@@ -19,9 +19,10 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 .zone-icon{font-size:52px;margin-bottom:12px;display:block}
 .zone-h{font-family:monospace;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
 .zone-p{font-size:13px;color:#475569;margin-bottom:22px;line-height:1.6}
-.btn-row{display:flex;gap:10px;justify-content:center}
-.btn-cam{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;font-weight:700;font-size:15px;font-family:monospace;text-transform:uppercase;border:none;border-radius:10px;padding:13px 24px;cursor:pointer}
-.btn-gal{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#e2e8f0;font-weight:700;font-size:15px;font-family:monospace;text-transform:uppercase;border-radius:10px;padding:13px 24px;cursor:pointer}
+.btn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn-cam{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;font-weight:700;font-size:15px;font-family:monospace;text-transform:uppercase;border:none;border-radius:10px;padding:13px 24px;cursor:pointer;position:relative;overflow:hidden}
+.btn-gal{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#e2e8f0;font-weight:700;font-size:15px;font-family:monospace;text-transform:uppercase;border-radius:10px;padding:13px 24px;cursor:pointer;position:relative;overflow:hidden}
+.btn-cam input,.btn-gal input{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0}
 .loading{display:none;border:2px dashed rgba(14,165,233,.3);border-radius:14px;padding:24px 14px;text-align:center;background:rgba(14,165,233,.04)}
 .loading img{width:100%;max-height:190px;object-fit:cover;border-radius:10px;margin-bottom:18px}
 .spin-row{display:inline-flex;align-items:center;gap:10px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);border-radius:30px;padding:12px 22px;color:#0ea5e9;font-size:14px;font-weight:600}
@@ -74,18 +75,22 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
   <div class="zone" id="uploadZone">
     <span class="zone-icon">&#128230;</span>
     <div class="zone-h">Take Container Photo</div>
-    <p class="zone-p">Point camera at the container number.<br>AI will read it automatically.</p>
+    <p class="zone-p">Point camera at the container number.<br>AI will scan 3 times for accuracy.</p>
     <div class="btn-row">
-      <button class="btn-cam" onclick="triggerInput('camInput')">&#128247; Camera</button>
-      <button class="btn-gal" onclick="triggerInput('galInput')">&#128444; Gallery</button>
+      <label class="btn-cam">
+        &#128247; Camera
+        <input type="file" accept="image/*" capture="environment" onchange="handleFile(this)">
+      </label>
+      <label class="btn-gal">
+        &#128444; Gallery
+        <input type="file" accept="image/*" onchange="handleFile(this)">
+      </label>
     </div>
-    <input type="file" id="camInput" accept="image/*" capture="environment" style="position:fixed;top:-999px;left:-999px;opacity:0" onchange="handleFile(this)">
-    <input type="file" id="galInput" accept="image/*" style="position:fixed;top:-999px;left:-999px;opacity:0" onchange="handleFile(this)">
   </div>
 
   <div class="loading" id="loadingBox">
     <img id="loadingImg" src="" alt="">
-    <div class="spin-row"><div class="spinner"></div>AI reading container number&hellip;</div>
+    <div class="spin-row"><div class="spinner"></div><span id="scanMsg">Scanning 1 of 3...</span></div>
   </div>
 
   <div class="result" id="resultBox">
@@ -94,7 +99,7 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
     <div class="banner" id="banner"></div>
     <div class="num-box">
       <div class="num-lbl">Container Number &mdash; edit if needed</div>
-      <input type="text" id="numInput" placeholder="CSNU2163239" maxlength="15"
+      <input type="text" id="numInput" placeholder="TIIU6093197" maxlength="11"
              oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
     </div>
     <div class="act-row">
@@ -114,7 +119,7 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 <div class="toast" id="toast"></div>
 
 <script>
-var WORKER_URL = 'https://noisy-union-8a2e.nicholastky90.workers.dev/';
+var WORKER = 'https://noisy-union-8a2e.nicholastky90.workers.dev/';
 var STORE = 'ct_pro';
 var records = [];
 try { records = JSON.parse(localStorage.getItem(STORE) || '[]'); } catch(e) {}
@@ -126,7 +131,7 @@ function resizeImage(file, cb) {
   reader.onload = function(e) {
     var img = new Image();
     img.onload = function() {
-      var MAX = 1024, w = img.width, h = img.height;
+      var MAX = 1280, w = img.width, h = img.height;
       if (w > MAX || h > MAX) {
         if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
         else { w = Math.round(w * MAX / h); h = MAX; }
@@ -134,18 +139,12 @@ function resizeImage(file, cb) {
       var c = document.createElement('canvas');
       c.width = w; c.height = h;
       c.getContext('2d').drawImage(img, 0, 0, w, h);
-      var url = c.toDataURL('image/jpeg', 0.88);
+      var url = c.toDataURL('image/jpeg', 0.92);
       cb(url, url.split(',')[1]);
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
-}
-
-function triggerInput(id) {
-  var el = document.getElementById(id);
-  el.value = '';
-  el.click();
 }
 
 function handleFile(input) {
@@ -161,51 +160,91 @@ function handleFile(input) {
   });
 }
 
-function callAPI(b64, imgUrl) {
-  fetch(WORKER_URL, {
+function readOnce(b64, prompt, scanNum) {
+  document.getElementById('scanMsg').textContent = 'Scanning ' + scanNum + ' of 3...';
+  return fetch(WORKER, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 64,
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
-          { type: 'text', text: 'You are an expert at reading ISO shipping container numbers. Examine every part of this image very carefully including vertical text on walls. The container number is exactly 4 capital letters followed by 7 digits (e.g. TIIU6093197, TCNU6063917). Common owner codes are: TCNU, CSNU, TIIU, MSCU, HLXU, TGHU, GESU, TRHU. Read each character very carefully - do not confuse 0 with Q, 1 with I, 6 with G, 8 with B. Reply ONLY with the container number, no spaces. If unclear reply: NOTFOUND' }
-        ]
-      }]
+      model: 'claude-opus-4-6',
+      max_tokens: 32,
+      messages: [{ role: 'user', content: [
+        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
+        { type: 'text', text: prompt }
+      ]}]
     })
   })
-  .then(function(res) { return res.json().then(function(json) { return { ok: res.ok, status: res.status, json: json }; }); })
-  .then(function(r) {
-    if (!r.ok) { showResult(imgUrl, '', (r.json && r.json.error && r.json.error.message) || ('API error ' + r.status)); return; }
-    var raw = ((r.json.content && r.json.content[0] && r.json.content[0].text) || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (!raw || raw === 'NOTFOUND' || raw.length < 7) {
-      showResult(imgUrl, '', 'Could not read clearly. Please type below.');
+  .then(function(res) { return res.json(); })
+  .then(function(json) {
+    if (json.error) throw new Error(json.error.message);
+    return ((json.content && json.content[0] && json.content[0].text) || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  });
+}
+
+function callAPI(b64, imgUrl) {
+  var p1 = 'Find the ISO shipping container number in this image. It is EXACTLY 4 capital letters followed by 7 digits, total 11 characters. Example: TIIU6093197. The text may be vertical, horizontal, small, or at an angle. Look at every part of the image. Be very careful with similar characters: 0 vs Q, 1 vs I, 6 vs G, 8 vs B. Reply with ONLY the 11 characters, nothing else. If not found: NOTFOUND';
+  var p2 = 'You are reading a shipping container number. Look carefully at this image for text that matches: 3 owner letters + U + 6 digits + 1 check digit = 11 total. The number may be painted on doors, side walls, or written vertically. Common owner codes: TCNU CSNU TIIU MSCU HLXU TGHU GESU TRHU CAIU. Read each digit one by one carefully. Reply ONLY the 11-character code with no spaces or punctuation.';
+  var p3 = 'This shipping container image contains a registration number. Study every part including corners and side panels. The number format is exactly: [A-Z][A-Z][A-Z][A-Z][0-9][0-9][0-9][0-9][0-9][0-9][0-9]. It may be rotated or partially visible. Do not guess - read what you actually see. Reply ONLY the 11 characters.';
+
+  var results = [];
+
+  readOnce(b64, p1, 1)
+  .then(function(r1) {
+    results.push(r1);
+    return readOnce(b64, p2, 2);
+  })
+  .then(function(r2) {
+    results.push(r2);
+    return readOnce(b64, p3, 3);
+  })
+  .then(function(r3) {
+    results.push(r3);
+    document.getElementById('scanMsg').textContent = 'Checking results...';
+
+    var isValid = function(r) { return r && r !== 'NOTFOUND' && r.length === 11 && /^[A-Z]{4}[0-9]{7}$/.test(r); };
+    var v = results.filter(isValid);
+
+    var winner = null, confidence = 0;
+
+    if (v.length >= 2) {
+      var counts = {};
+      v.forEach(function(r) { counts[r] = (counts[r] || 0) + 1; });
+      var best = null, bestCount = 0;
+      Object.keys(counts).forEach(function(k) {
+        if (counts[k] > bestCount) { bestCount = counts[k]; best = k; }
+      });
+      winner = best;
+      confidence = bestCount;
+    } else if (v.length === 1) {
+      winner = v[0];
+      confidence = 1;
+    }
+
+    if (winner) {
+      var checkOk = validateContainer(winner);
+      showResult(imgUrl, winner, '', confidence, checkOk, results);
     } else {
-      showResult(imgUrl, raw, '');
+      showResult(imgUrl, '', 'Could not read clearly. Please type manually.', 0, false, results);
     }
   })
-  .catch(function(e) { showResult(imgUrl, '', 'Network error: ' + e.message); });
+  .catch(function(e) {
+    showResult(imgUrl, '', 'Error: ' + e.message, 0, false, []);
+  });
 }
 
 // ISO 6346 check digit validation
 function validateContainer(num) {
   if (!num || num.length !== 11) return false;
-  var letters = 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z';
-  var vals = letters.split(' ');
-  var letterMap = {};
+  var map = {};
   var v = 10;
-  vals.forEach(function(l) {
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l) {
     if (v % 11 === 10) v++;
-    letterMap[l] = v;
-    v++;
+    map[l] = v++;
   });
   var sum = 0;
   for (var i = 0; i < 10; i++) {
     var c = num[i];
-    var val = isNaN(c) ? letterMap[c] : parseInt(c);
+    var val = isNaN(c) ? map[c] : parseInt(c);
     if (val === undefined) return false;
     sum += val * Math.pow(2, i);
   }
@@ -214,7 +253,7 @@ function validateContainer(num) {
   return check === parseInt(num[10]);
 }
 
-function showResult(imgUrl, detected, err, confidence, checkOk) {
+function showResult(imgUrl, detected, err, confidence, checkOk, allReads) {
   document.getElementById('loadingBox').style.display = 'none';
   document.getElementById('resultBox').style.display = 'block';
   document.getElementById('prevImg').src = imgUrl;
@@ -226,17 +265,13 @@ function showResult(imgUrl, detected, err, confidence, checkOk) {
     b.className = (perfect || good) ? 'banner ok' : 'banner warn';
     var icon = perfect ? '&#9989;&#9989;&#9989;' : good ? '&#9989;&#9989;' : '&#9888;&#65039;';
     var label = perfect ? '100% Confirmed' : good ? 'High Confidence' : 'Please Verify';
-    var detail = perfect ? '3/3 reads match + check digit valid'
-               : good    ? confidence + '/3 reads match + check digit valid'
-               :            'Only ' + confidence + '/3 reads agree — edit if wrong';
+    var detail = perfect ? 'All 3 scans match + check digit valid'
+               : good    ? confidence + '/3 scans agree + check digit valid'
+               :            confidence + '/3 scans agree &mdash; verify manually';
     b.innerHTML = icon + ' ' + label + ': '
       + '<span style="font-family:monospace;letter-spacing:3px;font-size:16px">' + detected + '</span>'
       + '<br><small style="font-weight:400;font-size:12px">' + detail + '</small>';
   } else {
-    b.className = 'banner err';
-    b.textContent = 'Could not read: ' + err;
-  }
-}
     b.className = 'banner err';
     b.textContent = 'Could not read: ' + err;
   }
@@ -267,9 +302,7 @@ function logRecord() {
 
 function delRecord(id) {
   records = records.filter(function(r) { return r.id !== id; });
-  saveRecords();
-  renderRecords();
-  showToast('Deleted');
+  saveRecords(); renderRecords(); showToast('Deleted');
 }
 
 function renderRecords() {
@@ -290,7 +323,7 @@ function renderRecords() {
     html += '<div class="date-lbl"><span>' + date + '</span><span>' + recs.length + ' record' + (recs.length > 1 ? 's' : '') + '</span></div>';
     recs.forEach(function(r, i) {
       html += '<div class="rec-row">'
-        + '<div class="rec-idx">#' + (i + 1) + '</div>'
+        + '<div class="rec-idx">#' + (i+1) + '</div>'
         + '<div class="rec-num">' + r.containerNumber + '</div>'
         + '<div class="rec-meta">' + r.date + '<br>' + r.time + '</div>'
         + '<button class="btn-del" onclick="delRecord(' + r.id + ')">&#10005;</button>'
@@ -302,13 +335,12 @@ function renderRecords() {
 
 function exportCSV() {
   if (!records.length) { showToast('No records yet'); return; }
-  var rows = [['No.', 'Container Number', 'Date', 'Time']];
-  records.forEach(function(r, i) { rows.push([i + 1, r.containerNumber, r.date, r.time]); });
+  var rows = [['No.','Container Number','Date','Time']];
+  records.forEach(function(r, i) { rows.push([i+1, r.containerNumber, r.date, r.time]); });
   var csv = rows.map(function(r) { return r.join(','); }).join('\n');
-  var blob = new Blob([csv], { type: 'text/csv' });
   var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'containers-' + new Date().toLocaleDateString('en-GB').replace(/\//g, '-') + '.csv';
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = 'containers-' + new Date().toLocaleDateString('en-GB').replace(/\//g,'-') + '.csv';
   a.click();
   showToast('CSV downloaded!');
 }
@@ -316,10 +348,8 @@ function exportCSV() {
 var tt;
 function showToast(msg) {
   var t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(tt);
-  tt = setTimeout(function() { t.classList.remove('show'); }, 2500);
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(tt); tt = setTimeout(function() { t.classList.remove('show'); }, 2500);
 }
 </script>
 </body>
