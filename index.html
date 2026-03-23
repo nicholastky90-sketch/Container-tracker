@@ -78,9 +78,22 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
   <div class="zone" id="uploadZone">
     <span class="zone-icon">&#128230;</span>
     <div class="zone-h">Scan Container</div>
-    <p class="zone-p">AI scans 5 times &amp; cross-checks for maximum accuracy.</p>
+    <p class="zone-p">For best accuracy: <strong style="color:#0ea5e9">get close</strong> to the number.<br>AI scans 5x + double-check.</p>
     <button class="btn-upload" onclick="openCam()">&#128247;&nbsp; OPEN CAMERA</button>
     <button class="btn-upload-gal" onclick="openGal()">&#128444;&nbsp; CHOOSE FROM GALLERY</button>
+  </div>
+
+  <!-- Crop UI -->
+  <div id="cropBox" style="display:none">
+    <p style="font-size:13px;color:#0ea5e9;text-align:center;margin-bottom:10px;font-weight:600">&#9000;&#65039; Drag to select the container number area, then tap Scan</p>
+    <div style="position:relative;display:inline-block;width:100%">
+      <canvas id="cropCanvas" style="width:100%;border-radius:12px;display:block;touch-action:none"></canvas>
+      <canvas id="overlayCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;touch-action:none"></canvas>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <button class="btn-retake" onclick="resetAll()">&#10005; Cancel</button>
+      <button class="btn-log" style="flex:2" onclick="scanCropped()">&#128269; SCAN THIS AREA</button>
+    </div>
   </div>
 
   <div class="loading" id="loadingBox">
@@ -122,20 +135,123 @@ try { records = JSON.parse(localStorage.getItem(STORE)||'[]'); } catch(e){}
 function saveRecords(){ localStorage.setItem(STORE, JSON.stringify(records)); }
 window.onload = function(){ renderRecords(); };
 
+// Crop state
+var cropState={active:false,startX:0,startY:0,endX:0,endY:0,dragging:false};
+var fullB64orig='', fullB64enhanced='', fullB64inverted='', fullImgUrl='';
+var cropScaleX=1, cropScaleY=1, cropImgW=0, cropImgH=0;
+
 function openCam(){ var f=document.getElementById('f1'); f.value=''; f.click(); }
 function openGal(){ var f=document.getElementById('f2'); f.value=''; f.click(); }
 
 function handleFile(input){
   var file=input.files[0]; if(!file) return;
   resizeImage(file, function(url, b64orig, b64enhanced, b64inverted){
-    document.getElementById('uploadZone').style.display='none';
-    document.getElementById('resultBox').style.display='none';
-    document.getElementById('loadingBox').style.display='block';
-    document.getElementById('loadingImg').src=url;
-    document.getElementById('progressBar').style.width='0%';
-    callAPI(b64orig, b64enhanced, b64inverted, url);
+    fullB64orig=b64orig; fullB64enhanced=b64enhanced; fullB64inverted=b64inverted; fullImgUrl=url;
+    showCropUI(url);
   });
 }
+
+function showCropUI(url){
+  document.getElementById('uploadZone').style.display='none';
+  document.getElementById('loadingBox').style.display='none';
+  document.getElementById('resultBox').style.display='none';
+  document.getElementById('cropBox').style.display='block';
+
+  var canvas=document.getElementById('cropCanvas');
+  var overlay=document.getElementById('overlayCanvas');
+  var img=new Image();
+  img.onload=function(){
+    cropImgW=img.width; cropImgH=img.height;
+    canvas.width=img.width; canvas.height=img.height;
+    overlay.width=img.width; overlay.height=img.height;
+    canvas.getContext('2d').drawImage(img,0,0);
+    setupCropEvents(overlay);
+    // Auto-select right 25% of image where number usually is
+    var autoX=Math.floor(img.width*0.72);
+    cropState={active:true,startX:autoX,startY:0,endX:img.width,endY:img.height,dragging:false};
+    drawOverlay();
+  };
+  img.src=url;
+}
+
+function setupCropEvents(overlay){
+  function getPos(e){
+    var rect=overlay.getBoundingClientRect();
+    var scaleX=overlay.width/rect.width;
+    var scaleY=overlay.height/rect.height;
+    var clientX=e.touches?e.touches[0].clientX:e.clientX;
+    var clientY=e.touches?e.touches[0].clientY:e.clientY;
+    return{x:Math.round((clientX-rect.left)*scaleX),y:Math.round((clientY-rect.top)*scaleY)};
+  }
+  function start(e){ e.preventDefault(); var p=getPos(e); cropState.dragging=true; cropState.startX=p.x; cropState.startY=p.y; cropState.endX=p.x; cropState.endY=p.y; cropState.active=true; }
+  function move(e){ e.preventDefault(); if(!cropState.dragging) return; var p=getPos(e); cropState.endX=p.x; cropState.endY=p.y; drawOverlay(); }
+  function end(e){ e.preventDefault(); cropState.dragging=false; drawOverlay(); }
+  overlay.addEventListener('mousedown',start); overlay.addEventListener('mousemove',move); overlay.addEventListener('mouseup',end);
+  overlay.addEventListener('touchstart',start,{passive:false}); overlay.addEventListener('touchmove',move,{passive:false}); overlay.addEventListener('touchend',end,{passive:false});
+}
+
+function drawOverlay(){
+  var overlay=document.getElementById('overlayCanvas');
+  var ctx=overlay.getContext('2d');
+  ctx.clearRect(0,0,overlay.width,overlay.height);
+  if(!cropState.active) return;
+  var x=Math.min(cropState.startX,cropState.endX);
+  var y=Math.min(cropState.startY,cropState.endY);
+  var w=Math.abs(cropState.endX-cropState.startX);
+  var h=Math.abs(cropState.endY-cropState.startY);
+  // Darken outside
+  ctx.fillStyle='rgba(0,0,0,0.55)';
+  ctx.fillRect(0,0,overlay.width,overlay.height);
+  ctx.clearRect(x,y,w,h);
+  // Border
+  ctx.strokeStyle='#0ea5e9';
+  ctx.lineWidth=3;
+  ctx.strokeRect(x,y,w,h);
+  // Corner handles
+  var hs=14;
+  ctx.fillStyle='#0ea5e9';
+  [[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(function(p){ ctx.fillRect(p[0]-hs/2,p[1]-hs/2,hs,hs); });
+}
+
+function scanCropped(){
+  if(!cropState.active){ startScan(fullB64orig,fullB64enhanced,fullB64inverted,fullImgUrl); return; }
+  var x=Math.min(cropState.startX,cropState.endX);
+  var y=Math.min(cropState.startY,cropState.endY);
+  var w=Math.abs(cropState.endX-cropState.startX)||cropImgW;
+  var h=Math.abs(cropState.endY-cropState.startY)||cropImgH;
+
+  // Crop from original canvas
+  var src=document.getElementById('cropCanvas');
+  // Cropped original
+  var co=document.createElement('canvas'); co.width=w; co.height=h;
+  co.getContext('2d').drawImage(src,x,y,w,h,0,0,w,h);
+  var croppedUrl=co.toDataURL('image/jpeg',0.97);
+  var croppedB64=croppedUrl.split(',')[1];
+
+  // Enhanced contrast of crop
+  var ce=document.createElement('canvas'); ce.width=w; ce.height=h;
+  var ctxe=ce.getContext('2d'); ctxe.drawImage(src,x,y,w,h,0,0,w,h);
+  var id=ctxe.getImageData(0,0,w,h); var d=id.data;
+  for(var i=0;i<d.length;i+=4){ var g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]; g=((g-128)*2.0)+128; g=Math.max(0,Math.min(255,g)); d[i]=d[i+1]=d[i+2]=g; }
+  ctxe.putImageData(id,0,0);
+  var enhB64=ce.toDataURL('image/jpeg',0.97).split(',')[1];
+
+  // Inverted
+  var ci=document.createElement('canvas'); ci.width=w; ci.height=h;
+  var ctxi=ci.getContext('2d'); ctxi.drawImage(src,x,y,w,h,0,0,w,h);
+  var id2=ctxi.getImageData(0,0,w,h); var d2=id2.data;
+  for(var j=0;j<d2.length;j+=4){ d2[j]=255-d2[j]; d2[j+1]=255-d2[j+1]; d2[j+2]=255-d2[j+2]; }
+  ctxi.putImageData(id2,0,0);
+  var invB64=ci.toDataURL('image/jpeg',0.97).split(',')[1];
+
+  document.getElementById('cropBox').style.display='none';
+  document.getElementById('loadingBox').style.display='block';
+  document.getElementById('loadingImg').src=croppedUrl;
+  document.getElementById('progressBar').style.width='0%';
+  startScan(croppedB64, enhB64, invB64, croppedUrl);
+}
+
+function startScan(b64orig, b64enhanced, b64inverted, imgUrl){
 
 function resizeImage(file, cb){
   var reader=new FileReader();
@@ -229,7 +345,7 @@ function isValidFormat(r){
   return r && r!=='NOTFOUND' && r.length===11 && /^[A-Z]{4}[0-9]{7}$/.test(r);
 }
 
-function callAPI(b64orig, b64enhanced, b64inverted, imgUrl){
+function startScan(b64orig, b64enhanced, b64inverted, imgUrl){
   var results=[];
   // Scan plan: orig x2, enhanced x2, inverted x1 (catches white-on-dark)
   var scanPlan=[
@@ -248,6 +364,7 @@ function callAPI(b64orig, b64enhanced, b64inverted, imgUrl){
   }
   runScan(0);
 }
+
 
 
 
@@ -381,6 +498,7 @@ function showResult(imgUrl, detected, err, votes, checkOk, confirmed){
 
 function resetAll(){
   document.getElementById('uploadZone').style.display='block';
+  document.getElementById('cropBox').style.display='none';
   document.getElementById('loadingBox').style.display='none';
   document.getElementById('resultBox').style.display='none';
   document.getElementById('numInput').value='';
