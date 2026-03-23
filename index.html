@@ -197,14 +197,9 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
       <div class="zone" style="margin-bottom:12px">
         <span class="zone-icon">&#128230;&#128230;</span>
         <div class="zone-h">Multi Container Scan</div>
-        <p class="zone-p">Add multiple container photos.<br>All will be scanned and logged at once.</p>
-        <button class="btn-primary" onclick="document.getElementById('f3').value='';document.getElementById('f3').click()">&#128247; ADD FROM CAMERA</button>
-        <button class="btn-secondary" onclick="document.getElementById('f4').value='';document.getElementById('f4').click()">&#128444; ADD FROM GALLERY</button>
-      </div>
-      <div class="multi-queue" id="multiQueue"></div>
-      <div id="multiScanBtn" style="display:none">
-        <button class="btn-green" onclick="startMultiScan()">&#9889; SCAN ALL (<span id="multiCount">0</span> photos)</button>
-        <button class="btn-ghost" onclick="clearMulti()">&#10005; Clear All</button>
+        <p class="zone-p">Take or upload <strong>1 photo</strong> containing multiple containers.<br>AI detects ALL numbers in the image at once.</p>
+        <button class="btn-primary" onclick="document.getElementById('f3').value='';document.getElementById('f3').click()">&#128247; TAKE PHOTO</button>
+        <button class="btn-secondary" onclick="document.getElementById('f4').value='';document.getElementById('f4').click()">&#128444; CHOOSE FROM GALLERY</button>
       </div>
     </div>
     <div class="loading" id="multiLoadingBox" style="display:none">
@@ -213,16 +208,17 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
       <div class="progress"><div class="progress-bar" id="multiProgressBar"></div></div>
     </div>
     <div id="multiResultBox" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div style="font-family:monospace;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#475569">Scan Results</div>
-        <span id="multiFoundLabel" style="font-size:12px;color:#4ade80;font-family:monospace;font-weight:700"></span>
+      <img class="bol-preview" id="multiPrevImg" src="" alt="">
+      <div class="bol-bar">
+        <span class="bol-found" id="multiFoundLabel">0 found</span>
+        <button class="btn-clr" onclick="resetMulti()">&#10005; Clear</button>
       </div>
-      <div class="multi-results" id="multiResults"></div>
+      <div class="bol-list" id="multiResults"></div>
       <div class="multi-actions">
         <button class="btn-multi-log" onclick="logAllMulti()">&#9989; Log All</button>
         <button class="btn-multi-csv" onclick="exportMultiCSV()">&#8681; CSV</button>
       </div>
-      <button class="btn-ghost" style="margin-top:8px" onclick="resetMulti()">&#8617; Scan More</button>
+      <button class="btn-ghost" style="margin-top:8px" onclick="resetMulti()">&#8617; Scan Another Photo</button>
     </div>
   </div>
 
@@ -369,11 +365,11 @@ function prepareAndScan(b64orig,previewUrl,msgId,barId,cb){
 }
 
 var PROMPTS=[
-  'Expert container OCR. Find ALL ISO container numbers in this image. There may be ONE or MULTIPLE containers visible. Each number is EXACTLY 11 chars: 4 uppercase letters + 7 digits (e.g. TIIU6093197). Any angle. CRITICAL: I vs 1, I vs R, I vs L, O vs 0, G vs 6, B vs 8. 2nd/3rd letters often I. Return ONLY a JSON array of all found numbers: ["TIIU6093197","TCNU1234567"]. If none: []',
-  'Find ALL container numbers in this photo. There may be multiple containers. Format: [3 letters][U][6 digits][check]=11 chars each. Codes: TCNU CSNU TIIU MSCU HLXU TGHU. Check ALL parts of image including vertical text. I often mistaken for R or L. Return ONLY JSON array: ["NUM1","NUM2"]. If none: []',
-  'Scan entire image for ALL ISO 6346 container codes. Each is 4 letters then 7 digits. Multiple containers may be visible at different positions. 4th letter usually U. Verify each char: I vs R vs L. Return ONLY JSON array of all found codes.',
-  'Find every container number in this image. Look at all containers visible. Each code: L-L-L-L-D-D-D-D-D-D-D (11 chars). Re-check each: I vs R? I vs L? 0 vs O? 6 vs G? 8 vs B? Return ONLY JSON array.',
-  'List ALL container identification codes visible anywhere in this image. Each is 4 letters+7 digits. I vs R vs L most confused. Common: TCNU TIIU TGHU TRHU. Return ONLY JSON array of all 11-char codes found.'
+  'Expert container OCR. Find EXACTLY 11 chars: 4 uppercase letters + 7 digits. Example: TIIU6093197. Any angle. CRITICAL: I vs 1, I vs R, I vs L, O vs 0, G vs 6, B vs 8. 2nd/3rd letters often I. Reply ONLY 11 chars. Not found: NOTFOUND',
+  'Container number [3 letters][U][6 digits][check]=11 chars. Codes: TCNU CSNU TIIU MSCU HLXU TGHU. Check vertical text. I often mistaken for R or L. Reply ONLY 11 chars.',
+  'ISO 6346 code: 4 letters then 7 digits. 4th letter usually U. Verify each char twice esp I vs R vs L. Reply ONLY 11-char code.',
+  'Container: L-L-L-L-D-D-D-D-D-D-D. Re-check: I vs R? I vs L? 0 vs O? 6 vs G? 8 vs B? Reply ONLY 11 chars.',
+  'Container code 4 letters+7 digits. Focus on each letter: I vs R vs L most confused. Common: TCNU TIIU TGHU TRHU. Reply ONLY 11-char code.'
 ];
 
 function apiCall(b64,prompt,maxTok){
@@ -387,76 +383,37 @@ function apiCall(b64,prompt,maxTok){
   });
 }
 
-function parseNumbers(text){
-  var found=[];
-  // Try JSON array first
-  try{
-    var m=text.match(/\[[\s\S]*?\]/);
-    if(m){
-      var arr=JSON.parse(m[0]);
-      arr.forEach(function(n){found.push((n+'').toUpperCase().replace(/[^A-Z0-9]/g,''));});
-    }
-  }catch(e){}
-  // Fallback: regex extract
-  if(!found.length){var re=/[A-Z]{4}[0-9]{7}/g,m2;while((m2=re.exec(text))!==null)found.push(m2[0]);}
-  // Deduplicate and validate
-  var seen={};
-  return found.filter(function(n){if(isValid(n)&&!seen[n]){seen[n]=true;return true;}return false;});
-}
-
 function isValid(r){return r&&r!=='NOTFOUND'&&r.length===11&&/^[A-Z]{4}[0-9]{7}$/.test(r);}
 
 function runFiveScans(orig,enh,inv,msgId,barId,cb){
   var plan=[{b:orig,p:PROMPTS[0]},{b:enh,p:PROMPTS[1]},{b:orig,p:PROMPTS[2]},{b:enh,p:PROMPTS[3]},{b:inv,p:PROMPTS[4]}];
-  var allResults=[];
+  var results=[];
   function run(i){
-    if(i>=5){doVerifyMulti(orig,enh,allResults,msgId,barId,cb);return;}
+    if(i>=5){doVerify(orig,enh,results,msgId,barId,cb);return;}
     document.getElementById(msgId).textContent='Scanning '+(i+1)+' of 5...';
     document.getElementById(barId).style.width=((i)*14)+'%';
-    apiCall(plan[i].b,plan[i].p,200).then(function(text){
-      var nums=parseNumbers(text);
-      nums.forEach(function(n){allResults.push(n);});
-      run(i+1);
-    }).catch(function(){run(i+1);});
+    apiCall(plan[i].b,plan[i].p).then(function(r){results.push(r);run(i+1);}).catch(function(){results.push('ERR');run(i+1);});
   }
   run(0);
 }
 
-function doVerifyMulti(orig,enh,allResults,msgId,barId,cb){
+function doVerify(orig,enh,results,msgId,barId,cb){
   document.getElementById(msgId).textContent='Double-checking...';
   document.getElementById(barId).style.width='80%';
-
-  // Count votes per number across all 5 scans
-  var counts={};
-  allResults.forEach(function(n){counts[n]=(counts[n]||0)+1;});
-
-  // Keep numbers seen at least twice OR validated by check digit
-  var candidates=Object.keys(counts).filter(function(n){
-    return counts[n]>=2||validateContainer(n);
-  });
-
-  if(!candidates.length&&allResults.length){
-    // Fallback: take anything seen at least once
-    candidates=Object.keys(counts);
-  }
-
-  if(!candidates.length){cb([],'Could not detect any container number.',false);return;}
-
-  // Final verify pass
-  var vp='This image contains containers. I detected these numbers: '+JSON.stringify(candidates)
-    +'. Please verify each one carefully in the image. Fix any errors. Add any missed ones.'
-    +' Return ONLY a JSON array of correct numbers. Each must be 4 letters+7 digits.';
-
-  apiCall(enh,vp,300).then(function(text){
-    var verified=parseNumbers(text);
-    // Merge: prefer verified, fallback to candidates
-    var final=verified.length?verified:candidates;
+  var valid=results.filter(isValid);
+  if(!valid.length){cb('','Could not detect. Type manually.',0,false,false);return;}
+  var counts={};valid.forEach(function(r){counts[r]=(counts[r]||0)+1;});
+  var sorted=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
+  var winner=sorted[0],votes=counts[winner];
+  if(sorted.length>1&&counts[sorted[0]]===counts[sorted[1]]&&validateContainer(sorted[1])&&!validateContainer(sorted[0])){winner=sorted[1];votes=counts[sorted[1]];}
+  apiCall(enh,'Detected: '+winner+'. Verify each char: '+winner.split('').join(' ')+'. If correct: CONFIRMED '+winner+'. If wrong: reply correct 11-char code. If unsure: UNCERTAIN',30)
+  .then(function(reply){
+    var confirmed=false,final=winner;
+    if(reply.indexOf('CONFIRMED')===0){confirmed=true;}
+    else if(isValid(reply)){if(reply===winner)confirmed=true;else if(validateContainer(reply)&&!validateContainer(winner))final=reply;}
     document.getElementById(barId).style.width='100%';
-    cb(final,'',true);
-  }).catch(function(){
-    document.getElementById(barId).style.width='100%';
-    cb(candidates,'',false);
-  });
+    cb(final,'',votes,validateContainer(final),confirmed);
+  }).catch(function(){document.getElementById(barId).style.width='100%';cb(winner,'',votes,validateContainer(winner),false);});
 }
 
 function showSingleResult(imgUrl,detected,err,votes,checkOk,confirmed){
@@ -528,10 +485,10 @@ function startMultiScan(){
     document.getElementById('multiScanMsg').textContent='Scanning '+(current+1)+' of '+multiQueue.length+'...';
     document.getElementById('multiProgressBar').style.width=((current/multiQueue.length)*100)+'%';
 
-    prepareAndScan(item.b64,item.url,'multiScanMsg','multiProgressBar',function(numbers,err,verified){
-      item.status=numbers&&numbers.length?'done':'fail';
-      item.number=numbers&&numbers.length?numbers.join(', '):'';
-      multiResults.push({url:item.url,numbers:numbers||[],err:err,verified:verified});
+    prepareAndScan(item.b64,item.url,'multiScanMsg','multiProgressBar',function(detected,err,votes,checkOk,confirmed){
+      item.status=detected?'done':'fail';
+      item.number=detected||'';
+      multiResults.push({url:item.url,number:detected,err:err,votes:votes,checkOk:checkOk,confirmed:confirmed});
       current++;
       scanNext();
     });
