@@ -19,10 +19,9 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 .zone-icon{font-size:52px;margin-bottom:12px;display:block}
 .zone-h{font-family:monospace;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
 .zone-p{font-size:13px;color:#475569;margin-bottom:22px;line-height:1.6}
-.btn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.btn-cam{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;font-weight:700;font-size:15px;font-family:monospace;text-transform:uppercase;border:none;border-radius:10px;padding:13px 24px;cursor:pointer;position:relative;overflow:hidden}
-.btn-gal{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#e2e8f0;font-weight:700;font-size:15px;font-family:monospace;text-transform:uppercase;border-radius:10px;padding:13px 24px;cursor:pointer;position:relative;overflow:hidden}
-.btn-cam input,.btn-gal input{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0}
+/* Single big upload button */
+.btn-upload{display:block;width:100%;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;font-weight:700;font-size:18px;font-family:monospace;text-transform:uppercase;border:none;border-radius:12px;padding:18px;cursor:pointer;letter-spacing:2px;margin-bottom:12px}
+.btn-upload-gal{display:block;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#e2e8f0;font-weight:700;font-size:18px;font-family:monospace;text-transform:uppercase;border-radius:12px;padding:18px;cursor:pointer;letter-spacing:2px}
 .loading{display:none;border:2px dashed rgba(14,165,233,.3);border-radius:14px;padding:24px 14px;text-align:center;background:rgba(14,165,233,.04)}
 .loading img{width:100%;max-height:190px;object-fit:cover;border-radius:10px;margin-bottom:18px}
 .spin-row{display:inline-flex;align-items:center;gap:10px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);border-radius:30px;padding:12px 22px;color:#0ea5e9;font-size:14px;font-weight:600}
@@ -38,7 +37,7 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 .banner.err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);color:#f87171;font-weight:400;font-size:13px}
 .num-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;margin-bottom:12px}
 .num-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#475569;margin-bottom:8px}
-#numInput{font-family:monospace;font-size:30px;font-weight:700;letter-spacing:5px;color:#facc15;background:rgba(250,204,21,.06);border:1px solid rgba(250,204,21,.3);border-radius:8px;padding:11px 14px;width:100%;text-transform:uppercase}
+#numInput{font-family:monospace;font-size:28px;font-weight:700;letter-spacing:4px;color:#facc15;background:rgba(250,204,21,.06);border:1px solid rgba(250,204,21,.3);border-radius:8px;padding:11px 14px;width:100%;text-transform:uppercase}
 #numInput:focus{outline:none;border-color:#facc15}
 .act-row{display:flex;gap:10px}
 .btn-retake{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#475569;font-family:monospace;font-size:13px;font-weight:700;text-transform:uppercase;border-radius:10px;padding:13px;cursor:pointer}
@@ -59,6 +58,11 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 </style>
 </head>
 <body>
+
+<!-- Hidden file inputs at top level - most compatible approach -->
+<input id="f1" type="file" accept="image/*" capture="environment" style="position:absolute;left:-9999px;top:-9999px" onchange="handleFile(this)">
+<input id="f2" type="file" accept="image/*" style="position:absolute;left:-9999px;top:-9999px" onchange="handleFile(this)">
+
 <div class="wrap">
   <div class="hdr">
     <div class="logo">&#128674;</div>
@@ -74,23 +78,15 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 
   <div class="zone" id="uploadZone">
     <span class="zone-icon">&#128230;</span>
-    <div class="zone-h">Take Container Photo</div>
-    <p class="zone-p">Point camera at the container number.<br>AI will scan 3 times for accuracy.</p>
-    <div class="btn-row">
-      <label class="btn-cam">
-        &#128247; Camera
-        <input type="file" accept="image/*" capture="environment" onchange="handleFile(this)">
-      </label>
-      <label class="btn-gal">
-        &#128444; Gallery
-        <input type="file" accept="image/*" onchange="handleFile(this)">
-      </label>
-    </div>
+    <div class="zone-h">Scan Container</div>
+    <p class="zone-p">AI will scan 3 times for maximum accuracy.</p>
+    <button class="btn-upload" id="btnCam" onclick="openCam()">&#128247;&nbsp; OPEN CAMERA</button>
+    <button class="btn-upload-gal" id="btnGal" onclick="openGal()">&#128444;&nbsp; CHOOSE FROM GALLERY</button>
   </div>
 
   <div class="loading" id="loadingBox">
     <img id="loadingImg" src="" alt="">
-    <div class="spin-row"><div class="spinner"></div><span id="scanMsg">Scanning 1 of 3...</span></div>
+    <div class="spin-row"><div class="spinner"></div><span id="scanMsg">Preparing scan...</span></div>
   </div>
 
   <div class="result" id="resultBox">
@@ -126,6 +122,30 @@ try { records = JSON.parse(localStorage.getItem(STORE) || '[]'); } catch(e) {}
 function saveRecords() { localStorage.setItem(STORE, JSON.stringify(records)); }
 window.onload = function() { renderRecords(); };
 
+function openCam() {
+  var f = document.getElementById('f1');
+  f.value = '';
+  f.click();
+}
+
+function openGal() {
+  var f = document.getElementById('f2');
+  f.value = '';
+  f.click();
+}
+
+function handleFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+  resizeImage(file, function(url, b64) {
+    document.getElementById('uploadZone').style.display = 'none';
+    document.getElementById('resultBox').style.display = 'none';
+    document.getElementById('loadingBox').style.display = 'block';
+    document.getElementById('loadingImg').src = url;
+    callAPI(b64, url);
+  });
+}
+
 function resizeImage(file, cb) {
   var reader = new FileReader();
   reader.onload = function(e) {
@@ -147,21 +167,8 @@ function resizeImage(file, cb) {
   reader.readAsDataURL(file);
 }
 
-function handleFile(input) {
-  var file = input.files[0];
-  if (!file) return;
-  input.value = '';
-  resizeImage(file, function(url, b64) {
-    document.getElementById('uploadZone').style.display = 'none';
-    document.getElementById('resultBox').style.display = 'none';
-    document.getElementById('loadingBox').style.display = 'block';
-    document.getElementById('loadingImg').src = url;
-    callAPI(b64, url);
-  });
-}
-
-function readOnce(b64, prompt, scanNum) {
-  document.getElementById('scanMsg').textContent = 'Scanning ' + scanNum + ' of 3...';
+function readOnce(b64, prompt, n) {
+  document.getElementById('scanMsg').textContent = 'Scanning ' + n + ' of 3...';
   return fetch(WORKER, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -174,102 +181,80 @@ function readOnce(b64, prompt, scanNum) {
       ]}]
     })
   })
-  .then(function(res) { return res.json(); })
-  .then(function(json) {
-    if (json.error) throw new Error(json.error.message);
-    return ((json.content && json.content[0] && json.content[0].text) || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  .then(function(r) { return r.json(); })
+  .then(function(j) {
+    if (j.error) throw new Error(j.error.message);
+    return ((j.content && j.content[0] && j.content[0].text) || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
   });
 }
 
 function callAPI(b64, imgUrl) {
-  var p1 = 'Find the ISO shipping container number in this image. It is EXACTLY 4 capital letters followed by 7 digits, total 11 characters. Example: TIIU6093197. The text may be vertical, horizontal, small, or at an angle. Look at every part of the image. Be very careful with similar characters: 0 vs Q, 1 vs I, 6 vs G, 8 vs B. Reply with ONLY the 11 characters, nothing else. If not found: NOTFOUND';
-  var p2 = 'You are reading a shipping container number. Look carefully at this image for text that matches: 3 owner letters + U + 6 digits + 1 check digit = 11 total. The number may be painted on doors, side walls, or written vertically. Common owner codes: TCNU CSNU TIIU MSCU HLXU TGHU GESU TRHU CAIU. Read each digit one by one carefully. Reply ONLY the 11-character code with no spaces or punctuation.';
-  var p3 = 'This shipping container image contains a registration number. Study every part including corners and side panels. The number format is exactly: [A-Z][A-Z][A-Z][A-Z][0-9][0-9][0-9][0-9][0-9][0-9][0-9]. It may be rotated or partially visible. Do not guess - read what you actually see. Reply ONLY the 11 characters.';
-
-  var results = [];
+  var p1 = 'Find the ISO shipping container number in this image. Exactly 4 capital letters then 7 digits = 11 chars total. Example: TIIU6093197. May be horizontal, vertical, or at angle. Careful: 0 vs Q, 1 vs I, 6 vs G, 8 vs B. Reply ONLY 11 characters. If unclear: NOTFOUND';
+  var p2 = 'Read the shipping container registration number from this image. Format: 3 owner letters + U + 6 digits + check digit = 11 chars. Common: TCNU CSNU TIIU MSCU HLXU TGHU. May be rotated or small. Read each character carefully. Reply ONLY the 11 chars, nothing else.';
+  var p3 = 'Examine this container image for the identification code. It has exactly 11 characters: 4 letters followed by 7 numbers. Look at all walls, doors, panels. Do not confuse similar characters. Reply ONLY the 11-character code.';
 
   readOnce(b64, p1, 1)
   .then(function(r1) {
-    results.push(r1);
-    return readOnce(b64, p2, 2);
-  })
-  .then(function(r2) {
-    results.push(r2);
-    return readOnce(b64, p3, 3);
-  })
-  .then(function(r3) {
-    results.push(r3);
-    document.getElementById('scanMsg').textContent = 'Checking results...';
-
-    var isValid = function(r) { return r && r !== 'NOTFOUND' && r.length === 11 && /^[A-Z]{4}[0-9]{7}$/.test(r); };
-    var v = results.filter(isValid);
-
-    var winner = null, confidence = 0;
-
-    if (v.length >= 2) {
-      var counts = {};
-      v.forEach(function(r) { counts[r] = (counts[r] || 0) + 1; });
-      var best = null, bestCount = 0;
-      Object.keys(counts).forEach(function(k) {
-        if (counts[k] > bestCount) { bestCount = counts[k]; best = k; }
+    return readOnce(b64, p2, 2).then(function(r2) {
+      return readOnce(b64, p3, 3).then(function(r3) {
+        return [r1, r2, r3];
       });
-      winner = best;
-      confidence = bestCount;
-    } else if (v.length === 1) {
-      winner = v[0];
-      confidence = 1;
+    });
+  })
+  .then(function(results) {
+    document.getElementById('scanMsg').textContent = 'Comparing results...';
+    var ok = function(r) { return r && r !== 'NOTFOUND' && /^[A-Z]{4}[0-9]{7}$/.test(r); };
+    var valid = results.filter(ok);
+    var winner = null, conf = 0;
+    if (valid.length) {
+      var counts = {};
+      valid.forEach(function(r) { counts[r] = (counts[r]||0)+1; });
+      Object.keys(counts).forEach(function(k) { if (counts[k] > conf) { winner = k; conf = counts[k]; }});
     }
-
     if (winner) {
-      var checkOk = validateContainer(winner);
-      showResult(imgUrl, winner, '', confidence, checkOk, results);
+      showResult(imgUrl, winner, '', conf, validateContainer(winner));
     } else {
-      showResult(imgUrl, '', 'Could not read clearly. Please type manually.', 0, false, results);
+      showResult(imgUrl, '', 'Could not read. Please type manually.', 0, false);
     }
   })
   .catch(function(e) {
-    showResult(imgUrl, '', 'Error: ' + e.message, 0, false, []);
+    showResult(imgUrl, '', 'Error: ' + e.message, 0, false);
   });
 }
 
-// ISO 6346 check digit validation
 function validateContainer(num) {
   if (!num || num.length !== 11) return false;
-  var map = {};
-  var v = 10;
+  var map = {}, v = 10;
   'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l) {
     if (v % 11 === 10) v++;
     map[l] = v++;
   });
   var sum = 0;
   for (var i = 0; i < 10; i++) {
-    var c = num[i];
-    var val = isNaN(c) ? map[c] : parseInt(c);
+    var c = num[i], val = isNaN(c) ? map[c] : parseInt(c);
     if (val === undefined) return false;
     sum += val * Math.pow(2, i);
   }
-  var check = sum % 11;
-  if (check === 10) check = 0;
-  return check === parseInt(num[10]);
+  var chk = sum % 11; if (chk === 10) chk = 0;
+  return chk === parseInt(num[10]);
 }
 
-function showResult(imgUrl, detected, err, confidence, checkOk, allReads) {
+function showResult(imgUrl, detected, err, conf, checkOk) {
   document.getElementById('loadingBox').style.display = 'none';
   document.getElementById('resultBox').style.display = 'block';
   document.getElementById('prevImg').src = imgUrl;
   document.getElementById('numInput').value = detected;
   var b = document.getElementById('banner');
   if (detected) {
-    var perfect = confidence === 3 && checkOk;
-    var good = confidence >= 2 && checkOk;
-    b.className = (perfect || good) ? 'banner ok' : 'banner warn';
+    var perfect = conf === 3 && checkOk;
+    var good = conf >= 2 && checkOk;
+    b.className = (perfect||good) ? 'banner ok' : 'banner warn';
     var icon = perfect ? '&#9989;&#9989;&#9989;' : good ? '&#9989;&#9989;' : '&#9888;&#65039;';
     var label = perfect ? '100% Confirmed' : good ? 'High Confidence' : 'Please Verify';
     var detail = perfect ? 'All 3 scans match + check digit valid'
-               : good    ? confidence + '/3 scans agree + check digit valid'
-               :            confidence + '/3 scans agree &mdash; verify manually';
-    b.innerHTML = icon + ' ' + label + ': '
-      + '<span style="font-family:monospace;letter-spacing:3px;font-size:16px">' + detected + '</span>'
+               : good    ? conf + '/3 scans agree + check digit valid'
+               :            conf + '/3 scans agree - verify manually';
+    b.innerHTML = icon + ' ' + label + ': <span style="font-family:monospace;letter-spacing:3px;font-size:16px">' + detected + '</span>'
       + '<br><small style="font-weight:400;font-size:12px">' + detail + '</small>';
   } else {
     b.className = 'banner err';
@@ -288,16 +273,8 @@ function logRecord() {
   var n = document.getElementById('numInput').value.trim().toUpperCase();
   if (!n) { showToast('Enter a container number'); return; }
   var now = new Date();
-  records.unshift({
-    id: Date.now(),
-    containerNumber: n,
-    date: now.toLocaleDateString('en-GB'),
-    time: now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-  });
-  saveRecords();
-  showToast(n + ' logged!');
-  resetAll();
-  renderRecords();
+  records.unshift({ id: Date.now(), containerNumber: n, date: now.toLocaleDateString('en-GB'), time: now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) });
+  saveRecords(); showToast(n + ' logged!'); resetAll(); renderRecords();
 }
 
 function delRecord(id) {
@@ -308,26 +285,15 @@ function delRecord(id) {
 function renderRecords() {
   document.getElementById('totalCount').textContent = records.length;
   var el = document.getElementById('recList');
-  if (!records.length) {
-    el.innerHTML = '<div class="empty">No records yet.<br>Take a photo to get started.</div>';
-    return;
-  }
+  if (!records.length) { el.innerHTML = '<div class="empty">No records yet.<br>Take a photo to get started.</div>'; return; }
   var grouped = {};
-  records.forEach(function(r) {
-    if (!grouped[r.date]) grouped[r.date] = [];
-    grouped[r.date].push(r);
-  });
+  records.forEach(function(r) { if (!grouped[r.date]) grouped[r.date]=[]; grouped[r.date].push(r); });
   var html = '';
   Object.keys(grouped).forEach(function(date) {
     var recs = grouped[date];
-    html += '<div class="date-lbl"><span>' + date + '</span><span>' + recs.length + ' record' + (recs.length > 1 ? 's' : '') + '</span></div>';
-    recs.forEach(function(r, i) {
-      html += '<div class="rec-row">'
-        + '<div class="rec-idx">#' + (i+1) + '</div>'
-        + '<div class="rec-num">' + r.containerNumber + '</div>'
-        + '<div class="rec-meta">' + r.date + '<br>' + r.time + '</div>'
-        + '<button class="btn-del" onclick="delRecord(' + r.id + ')">&#10005;</button>'
-        + '</div>';
+    html += '<div class="date-lbl"><span>' + date + '</span><span>' + recs.length + ' record' + (recs.length>1?'s':'') + '</span></div>';
+    recs.forEach(function(r,i) {
+      html += '<div class="rec-row"><div class="rec-idx">#'+(i+1)+'</div><div class="rec-num">'+r.containerNumber+'</div><div class="rec-meta">'+r.date+'<br>'+r.time+'</div><button class="btn-del" onclick="delRecord('+r.id+')">&#10005;</button></div>';
     });
   });
   el.innerHTML = html;
@@ -336,20 +302,18 @@ function renderRecords() {
 function exportCSV() {
   if (!records.length) { showToast('No records yet'); return; }
   var rows = [['No.','Container Number','Date','Time']];
-  records.forEach(function(r, i) { rows.push([i+1, r.containerNumber, r.date, r.time]); });
-  var csv = rows.map(function(r) { return r.join(','); }).join('\n');
+  records.forEach(function(r,i) { rows.push([i+1,r.containerNumber,r.date,r.time]); });
   var a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-  a.download = 'containers-' + new Date().toLocaleDateString('en-GB').replace(/\//g,'-') + '.csv';
-  a.click();
-  showToast('CSV downloaded!');
+  a.href = URL.createObjectURL(new Blob([rows.map(function(r){return r.join(',');}).join('\n')],{type:'text/csv'}));
+  a.download = 'containers-'+new Date().toLocaleDateString('en-GB').replace(/\//g,'-')+'.csv';
+  a.click(); showToast('CSV downloaded!');
 }
 
 var tt;
 function showToast(msg) {
   var t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
-  clearTimeout(tt); tt = setTimeout(function() { t.classList.remove('show'); }, 2500);
+  clearTimeout(tt); tt = setTimeout(function(){t.classList.remove('show');}, 2500);
 }
 </script>
 </body>
