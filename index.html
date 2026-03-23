@@ -113,7 +113,7 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 <div class="toast" id="toast"></div>
 
 <script>
-var API_KEY = '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';
+var WORKER_URL = 'https://noisy-union-8a2e.nicholastky90.workers.dev/';
 var STORE = 'ct_pro';
 var records = [];
 try { records = JSON.parse(localStorage.getItem(STORE) || '[]'); } catch(e) {}
@@ -155,12 +155,9 @@ function handleFile(input) {
 }
 
 function callAPI(b64, imgUrl) {
-  var url = 'https://noisy-union-8a2e.nicholastky90.workers.dev/';
-  fetch(url, {
+  fetch(WORKER_URL, {
     method: 'POST',
-    headers: {
-      'content-type': 'application/json'
-    },
+    headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       model: 'claude-3-5-haiku-20241022',
       max_tokens: 64,
