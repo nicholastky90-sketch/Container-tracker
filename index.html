@@ -150,7 +150,8 @@ function handleFile(input) {
 
 async function callAPI(b64, imgUrl) {
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const PROXY = 'https://corsproxy.io/?url=https://api.anthropic.com/v1/messages';
+    const res = await fetch(PROXY, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
