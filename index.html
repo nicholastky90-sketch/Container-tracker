@@ -21,6 +21,19 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 .zone-p{font-size:13px;color:#475569;margin-bottom:22px;line-height:1.6}
 .btn-upload{display:block;width:100%;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;font-weight:700;font-size:18px;font-family:monospace;text-transform:uppercase;border:none;border-radius:12px;padding:18px;cursor:pointer;letter-spacing:2px;margin-bottom:12px}
 .btn-upload-gal{display:block;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#e2e8f0;font-weight:700;font-size:18px;font-family:monospace;text-transform:uppercase;border-radius:12px;padding:18px;cursor:pointer;letter-spacing:2px}
+
+/* ZOOM EDITOR */
+.zoom-box{display:none;border:2px solid rgba(14,165,233,.4);border-radius:14px;overflow:hidden;background:#000;margin-bottom:12px;position:relative}
+.zoom-hint{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;font-size:11px;padding:5px 12px;border-radius:20px;white-space:nowrap;pointer-events:none;z-index:10;font-family:monospace}
+.zoom-canvas{display:block;width:100%;touch-action:none;cursor:grab}
+.zoom-canvas:active{cursor:grabbing}
+.zoom-controls{display:flex;gap:8px;padding:10px;background:rgba(0,0,0,.4)}
+.btn-zoom-in{flex:1;background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);color:#0ea5e9;font-size:20px;font-weight:700;border-radius:8px;padding:10px;cursor:pointer}
+.btn-zoom-out{flex:1;background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);color:#0ea5e9;font-size:20px;font-weight:700;border-radius:8px;padding:10px;cursor:pointer}
+.btn-zoom-reset{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#94a3b8;font-size:12px;font-weight:700;border-radius:8px;padding:10px;cursor:pointer;font-family:monospace;text-transform:uppercase}
+.btn-scan-now{display:block;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-weight:700;font-size:17px;font-family:monospace;text-transform:uppercase;border:none;border-radius:12px;padding:16px;cursor:pointer;letter-spacing:2px;margin-top:10px}
+.btn-zoom-cancel{display:block;width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#475569;font-family:monospace;font-size:13px;font-weight:700;text-transform:uppercase;border-radius:10px;padding:13px;cursor:pointer;margin-top:8px}
+
 .loading{display:none;border:2px dashed rgba(14,165,233,.3);border-radius:14px;padding:24px 14px;text-align:center;background:rgba(14,165,233,.04)}
 .loading img{width:100%;max-height:190px;object-fit:cover;border-radius:10px;margin-bottom:18px}
 .spin-row{display:inline-flex;align-items:center;gap:10px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);border-radius:30px;padding:12px 22px;color:#0ea5e9;font-size:14px;font-weight:600}
@@ -67,7 +80,7 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
     <div class="logo">&#128674;</div>
     <div>
       <div class="title">Container Tracker</div>
-      <div class="sub">Photo &rarr; AI 5x Scan &rarr; Log</div>
+      <div class="sub">Zoom &rarr; Crop &rarr; AI Scan &rarr; Log</div>
     </div>
     <div class="badge">
       <div class="badge-n" id="totalCount">0</div>
@@ -75,33 +88,38 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
     </div>
   </div>
 
+  <!-- Upload Zone -->
   <div class="zone" id="uploadZone">
     <span class="zone-icon">&#128230;</span>
     <div class="zone-h">Scan Container</div>
-    <p class="zone-p">For best accuracy: <strong style="color:#0ea5e9">get close</strong> to the number.<br>AI scans 5x + double-check.</p>
+    <p class="zone-p">Take or upload a photo, zoom into the number, then scan.</p>
     <button class="btn-upload" onclick="openCam()">&#128247;&nbsp; OPEN CAMERA</button>
     <button class="btn-upload-gal" onclick="openGal()">&#128444;&nbsp; CHOOSE FROM GALLERY</button>
   </div>
 
-  <!-- Crop UI -->
-  <div id="cropBox" style="display:none">
-    <p style="font-size:13px;color:#0ea5e9;text-align:center;margin-bottom:10px;font-weight:600">&#9000;&#65039; Drag to select the container number area, then tap Scan</p>
-    <div style="position:relative;display:inline-block;width:100%">
-      <canvas id="cropCanvas" style="width:100%;border-radius:12px;display:block;touch-action:none"></canvas>
-      <canvas id="overlayCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;touch-action:none"></canvas>
+  <!-- Zoom Editor -->
+  <div id="zoomSection" style="display:none">
+    <div class="zoom-box" id="zoomBox">
+      <div class="zoom-hint" id="zoomHint">&#128269; Pinch or use buttons to zoom &bull; Drag to pan</div>
+      <canvas id="zoomCanvas" class="zoom-canvas" height="300"></canvas>
+      <div class="zoom-controls">
+        <button class="btn-zoom-in" onclick="zoomIn()">+</button>
+        <button class="btn-zoom-out" onclick="zoomOut()">&#8722;</button>
+        <button class="btn-zoom-reset" onclick="zoomReset()">Reset</button>
+      </div>
     </div>
-    <div style="display:flex;gap:10px;margin-top:12px">
-      <button class="btn-retake" onclick="resetAll()">&#10005; Cancel</button>
-      <button class="btn-log" style="flex:2" onclick="scanCropped()">&#128269; SCAN THIS AREA</button>
-    </div>
+    <button class="btn-scan-now" onclick="scanCropped()">&#128269; SCAN THIS AREA</button>
+    <button class="btn-zoom-cancel" onclick="resetAll()">&#8617; Cancel</button>
   </div>
 
+  <!-- Loading -->
   <div class="loading" id="loadingBox">
     <img id="loadingImg" src="" alt="">
     <div class="spin-row"><div class="spinner"></div><span id="scanMsg">Preparing...</span></div>
     <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
   </div>
 
+  <!-- Result -->
   <div class="result" id="resultBox">
     <img class="prev-img" id="prevImg" src="" alt="">
     <div class="prev-bar"><button class="btn-clr" onclick="resetAll()">&#10005; Clear</button></div>
@@ -128,206 +146,224 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 <div class="toast" id="toast"></div>
 
 <script>
-var WORKER = 'https://noisy-union-8a2e.nicholastky90.workers.dev/';
-var STORE = 'ct_pro';
-var records = [];
-try { records = JSON.parse(localStorage.getItem(STORE)||'[]'); } catch(e){}
-function saveRecords(){ localStorage.setItem(STORE, JSON.stringify(records)); }
-window.onload = function(){ renderRecords(); };
+var WORKER='https://noisy-union-8a2e.nicholastky90.workers.dev/';
+var STORE='ct_pro';
+var records=[];
+try{records=JSON.parse(localStorage.getItem(STORE)||'[]');}catch(e){}
+function saveRecords(){localStorage.setItem(STORE,JSON.stringify(records));}
+window.onload=function(){renderRecords();};
 
-// Crop state
-var cropState={active:false,startX:0,startY:0,endX:0,endY:0,dragging:false};
-var fullB64orig='', fullB64enhanced='', fullB64inverted='', fullImgUrl='';
-var cropScaleX=1, cropScaleY=1, cropImgW=0, cropImgH=0;
+function openCam(){var f=document.getElementById('f1');f.value='';f.click();}
+function openGal(){var f=document.getElementById('f2');f.value='';f.click();}
 
-function openCam(){ var f=document.getElementById('f1'); f.value=''; f.click(); }
-function openGal(){ var f=document.getElementById('f2'); f.value=''; f.click(); }
+// ---- ZOOM STATE ----
+var zoomImg=null, zoomScale=1, zoomMinScale=1, zoomMaxScale=8;
+var zoomOffX=0, zoomOffY=0;
+var isDragging=false, lastX=0, lastY=0;
+var pinchStartDist=0, pinchStartScale=1;
 
 function handleFile(input){
   var file=input.files[0]; if(!file) return;
-  resizeImage(file, function(url, b64orig, b64enhanced, b64inverted){
-    fullB64orig=b64orig; fullB64enhanced=b64enhanced; fullB64inverted=b64inverted; fullImgUrl=url;
-    showCropUI(url);
-  });
-}
-
-function showCropUI(url){
-  document.getElementById('uploadZone').style.display='none';
-  document.getElementById('loadingBox').style.display='none';
-  document.getElementById('resultBox').style.display='none';
-  document.getElementById('cropBox').style.display='block';
-
-  var canvas=document.getElementById('cropCanvas');
-  var overlay=document.getElementById('overlayCanvas');
-  var img=new Image();
-  img.onload=function(){
-    cropImgW=img.width; cropImgH=img.height;
-    canvas.width=img.width; canvas.height=img.height;
-    overlay.width=img.width; overlay.height=img.height;
-    canvas.getContext('2d').drawImage(img,0,0);
-    setupCropEvents(overlay);
-    // Auto-select right 25% of image where number usually is
-    var autoX=Math.floor(img.width*0.72);
-    cropState={active:true,startX:autoX,startY:0,endX:img.width,endY:img.height,dragging:false};
-    drawOverlay();
-  };
-  img.src=url;
-}
-
-function setupCropEvents(overlay){
-  function getPos(e){
-    var rect=overlay.getBoundingClientRect();
-    var scaleX=overlay.width/rect.width;
-    var scaleY=overlay.height/rect.height;
-    var clientX=e.touches?e.touches[0].clientX:e.clientX;
-    var clientY=e.touches?e.touches[0].clientY:e.clientY;
-    return{x:Math.round((clientX-rect.left)*scaleX),y:Math.round((clientY-rect.top)*scaleY)};
-  }
-  function start(e){ e.preventDefault(); var p=getPos(e); cropState.dragging=true; cropState.startX=p.x; cropState.startY=p.y; cropState.endX=p.x; cropState.endY=p.y; cropState.active=true; }
-  function move(e){ e.preventDefault(); if(!cropState.dragging) return; var p=getPos(e); cropState.endX=p.x; cropState.endY=p.y; drawOverlay(); }
-  function end(e){ e.preventDefault(); cropState.dragging=false; drawOverlay(); }
-  overlay.addEventListener('mousedown',start); overlay.addEventListener('mousemove',move); overlay.addEventListener('mouseup',end);
-  overlay.addEventListener('touchstart',start,{passive:false}); overlay.addEventListener('touchmove',move,{passive:false}); overlay.addEventListener('touchend',end,{passive:false});
-}
-
-function drawOverlay(){
-  var overlay=document.getElementById('overlayCanvas');
-  var ctx=overlay.getContext('2d');
-  ctx.clearRect(0,0,overlay.width,overlay.height);
-  if(!cropState.active) return;
-  var x=Math.min(cropState.startX,cropState.endX);
-  var y=Math.min(cropState.startY,cropState.endY);
-  var w=Math.abs(cropState.endX-cropState.startX);
-  var h=Math.abs(cropState.endY-cropState.startY);
-  // Darken outside
-  ctx.fillStyle='rgba(0,0,0,0.55)';
-  ctx.fillRect(0,0,overlay.width,overlay.height);
-  ctx.clearRect(x,y,w,h);
-  // Border
-  ctx.strokeStyle='#0ea5e9';
-  ctx.lineWidth=3;
-  ctx.strokeRect(x,y,w,h);
-  // Corner handles
-  var hs=14;
-  ctx.fillStyle='#0ea5e9';
-  [[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(function(p){ ctx.fillRect(p[0]-hs/2,p[1]-hs/2,hs,hs); });
-}
-
-function scanCropped(){
-  if(!cropState.active){ startScan(fullB64orig,fullB64enhanced,fullB64inverted,fullImgUrl); return; }
-  var x=Math.min(cropState.startX,cropState.endX);
-  var y=Math.min(cropState.startY,cropState.endY);
-  var w=Math.abs(cropState.endX-cropState.startX)||cropImgW;
-  var h=Math.abs(cropState.endY-cropState.startY)||cropImgH;
-
-  // Crop from original canvas
-  var src=document.getElementById('cropCanvas');
-  // Cropped original
-  var co=document.createElement('canvas'); co.width=w; co.height=h;
-  co.getContext('2d').drawImage(src,x,y,w,h,0,0,w,h);
-  var croppedUrl=co.toDataURL('image/jpeg',0.97);
-  var croppedB64=croppedUrl.split(',')[1];
-
-  // Enhanced contrast of crop
-  var ce=document.createElement('canvas'); ce.width=w; ce.height=h;
-  var ctxe=ce.getContext('2d'); ctxe.drawImage(src,x,y,w,h,0,0,w,h);
-  var id=ctxe.getImageData(0,0,w,h); var d=id.data;
-  for(var i=0;i<d.length;i+=4){ var g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]; g=((g-128)*2.0)+128; g=Math.max(0,Math.min(255,g)); d[i]=d[i+1]=d[i+2]=g; }
-  ctxe.putImageData(id,0,0);
-  var enhB64=ce.toDataURL('image/jpeg',0.97).split(',')[1];
-
-  // Inverted
-  var ci=document.createElement('canvas'); ci.width=w; ci.height=h;
-  var ctxi=ci.getContext('2d'); ctxi.drawImage(src,x,y,w,h,0,0,w,h);
-  var id2=ctxi.getImageData(0,0,w,h); var d2=id2.data;
-  for(var j=0;j<d2.length;j+=4){ d2[j]=255-d2[j]; d2[j+1]=255-d2[j+1]; d2[j+2]=255-d2[j+2]; }
-  ctxi.putImageData(id2,0,0);
-  var invB64=ci.toDataURL('image/jpeg',0.97).split(',')[1];
-
-  document.getElementById('cropBox').style.display='none';
-  document.getElementById('loadingBox').style.display='block';
-  document.getElementById('loadingImg').src=croppedUrl;
-  document.getElementById('progressBar').style.width='0%';
-  startScan(croppedB64, enhB64, invB64, croppedUrl);
-}
-
-function startScan(b64orig, b64enhanced, b64inverted, imgUrl){
-
-function resizeImage(file, cb){
   var reader=new FileReader();
   reader.onload=function(e){
     var img=new Image();
     img.onload=function(){
-      var MAX=1600, w=img.width, h=img.height;
-      if(w>MAX||h>MAX){ if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;} }
-
-      // Original image
-      var c=document.createElement('canvas'); c.width=w; c.height=h;
-      var ctx=c.getContext('2d');
-      ctx.drawImage(img,0,0,w,h);
-      var orig=c.toDataURL('image/jpeg',0.95);
-
-      // High contrast enhanced version
-      var c2=document.createElement('canvas'); c2.width=w; c2.height=h;
-      var ctx2=c2.getContext('2d');
-      ctx2.drawImage(img,0,0,w,h);
-      var imgData=ctx2.getImageData(0,0,w,h);
-      var d=imgData.data;
-      for(var i=0;i<d.length;i+=4){
-        // Convert to grayscale
-        var gray=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
-        // Boost contrast: push darks darker, lights lighter
-        gray=((gray-128)*1.8)+128;
-        // Sharpen brightness curve
-        gray=Math.max(0,Math.min(255,gray));
-        d[i]=d[i+1]=d[i+2]=gray;
-      }
-      ctx2.putImageData(imgData,0,0);
-      var enhanced=c2.toDataURL('image/jpeg',0.95);
-
-      // Inverted version (white text becomes black - easier to read)
-      var c3=document.createElement('canvas'); c3.width=w; c3.height=h;
-      var ctx3=c3.getContext('2d');
-      ctx3.drawImage(img,0,0,w,h);
-      var imgData3=ctx3.getImageData(0,0,w,h);
-      var d3=imgData3.data;
-      for(var j=0;j<d3.length;j+=4){
-        d3[j]=255-d3[j];
-        d3[j+1]=255-d3[j+1];
-        d3[j+2]=255-d3[j+2];
-      }
-      ctx3.putImageData(imgData3,0,0);
-      var inverted=c3.toDataURL('image/jpeg',0.95);
-
-      cb(orig, orig.split(',')[1], enhanced.split(',')[1], inverted.split(',')[1]);
+      zoomImg=img;
+      document.getElementById('uploadZone').style.display='none';
+      document.getElementById('zoomSection').style.display='block';
+      document.getElementById('zoomBox').style.display='block';
+      initZoomCanvas();
+      setTimeout(function(){document.getElementById('zoomHint').style.opacity='0';},3000);
     };
     img.src=e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-// 5 different prompts - each focuses on a different aspect
-var PROMPTS = [
-  'You are an expert OCR system for ISO shipping containers. Carefully examine this image for a container number. It is EXACTLY 11 characters: 4 uppercase letters followed by 7 digits. Example: TIIU6093197, TCNU1234567. The number may appear horizontal, vertical, upside-down, or at any angle. Focus on large painted characters. Be extremely careful distinguishing: I vs 1, O vs 0, G vs 6, B vs 8, S vs 5, Z vs 2, Q vs 0. Reply with ONLY the 11 characters. No spaces, no explanation. If not found: NOTFOUND',
+function initZoomCanvas(){
+  var canvas=document.getElementById('zoomCanvas');
+  var wrap=canvas.parentElement;
+  canvas.width=wrap.clientWidth||360;
+  canvas.height=300;
+  zoomScale=1; zoomOffX=0; zoomOffY=0;
+  // Fit image to canvas
+  var scaleX=canvas.width/zoomImg.width;
+  var scaleY=canvas.height/zoomImg.height;
+  zoomMinScale=Math.min(scaleX,scaleY);
+  zoomScale=zoomMinScale;
+  zoomOffX=(canvas.width-zoomImg.width*zoomScale)/2;
+  zoomOffY=(canvas.height-zoomImg.height*zoomScale)/2;
+  drawZoom();
+  bindZoomEvents();
+}
 
-  'Shipping container OCR task. This image contains a container identification code. The code format is: [OWNER CODE 3 letters][U][6 digit serial][1 check digit]. Total 11 characters. Common owner codes: TCNU CSNU TIIU MSCU HLXU TGHU GESU TRHU CAIU FSCU CMAU OOLU. The number is usually painted large on the door or side panel. It may also appear small and vertical on interior walls. Examine EVERY part of the image systematically. Read left to right or top to bottom if vertical. Reply ONLY the 11 chars.',
+function drawZoom(){
+  var canvas=document.getElementById('zoomCanvas');
+  var ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#000';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(zoomImg, zoomOffX, zoomOffY, zoomImg.width*zoomScale, zoomImg.height*zoomScale);
+  // Draw crosshair guide
+  ctx.strokeStyle='rgba(14,165,233,0.3)';
+  ctx.lineWidth=1;
+  ctx.setLineDash([4,4]);
+  ctx.strokeRect(canvas.width*0.1, canvas.height*0.1, canvas.width*0.8, canvas.height*0.8);
+  ctx.setLineDash([]);
+}
 
-  'Look at this shipping container photo very carefully. I need the container registration number which is painted on the container surface. It always follows ISO 6346 format: exactly 4 capital letters then exactly 7 digits. The 4th letter is almost always U. Scan the entire image including edges, walls, doors, panels. The text could be any size or orientation. Once you find it, verify each character one more time before answering. Reply ONLY the raw 11-character code.',
+function clampOffset(){
+  var canvas=document.getElementById('zoomCanvas');
+  var imgW=zoomImg.width*zoomScale, imgH=zoomImg.height*zoomScale;
+  var maxX=canvas.width*0.9, minX=canvas.width*0.1-imgW;
+  var maxY=canvas.height*0.9, minY=canvas.height*0.1-imgH;
+  zoomOffX=Math.max(minX,Math.min(maxX,zoomOffX));
+  zoomOffY=Math.max(minY,Math.min(maxY,zoomOffY));
+}
 
-  'Perform careful character-by-character reading of the container number in this image. The number has this exact structure: Letter Letter Letter Letter Digit Digit Digit Digit Digit Digit Digit. Total: 11 characters. After reading, double-check: did you confuse 0 and O? Did you confuse 1 and I? Did you confuse 6 and G? Did you confuse 8 and B? Correct any errors then reply with ONLY the final 11-character answer.',
+function zoomIn(){
+  var canvas=document.getElementById('zoomCanvas');
+  var cx=canvas.width/2, cy=canvas.height/2;
+  var prevScale=zoomScale;
+  zoomScale=Math.min(zoomMaxScale, zoomScale*1.4);
+  zoomOffX=cx-(cx-zoomOffX)*(zoomScale/prevScale);
+  zoomOffY=cy-(cy-zoomOffY)*(zoomScale/prevScale);
+  clampOffset(); drawZoom();
+}
 
-  'This is a shipping container photo. Your task: find and return the container code. Rules: (1) Must be exactly 11 characters (2) First 4 must be letters A-Z (3) Last 7 must be digits 0-9 (4) 4th letter is usually U. Look at the ENTIRE image including any text that appears sideways or vertical. If you see multiple possible numbers, pick the one that best fits the format. Reply ONLY the 11-character code, nothing else.'
+function zoomOut(){
+  var canvas=document.getElementById('zoomCanvas');
+  var cx=canvas.width/2, cy=canvas.height/2;
+  var prevScale=zoomScale;
+  zoomScale=Math.max(zoomMinScale, zoomScale/1.4);
+  zoomOffX=cx-(cx-zoomOffX)*(zoomScale/prevScale);
+  zoomOffY=cy-(cy-zoomOffY)*(zoomScale/prevScale);
+  clampOffset(); drawZoom();
+}
+
+function zoomReset(){
+  var canvas=document.getElementById('zoomCanvas');
+  zoomScale=zoomMinScale;
+  zoomOffX=(canvas.width-zoomImg.width*zoomScale)/2;
+  zoomOffY=(canvas.height-zoomImg.height*zoomScale)/2;
+  drawZoom();
+}
+
+function bindZoomEvents(){
+  var canvas=document.getElementById('zoomCanvas');
+
+  // Mouse events
+  canvas.onmousedown=function(e){isDragging=true;lastX=e.clientX;lastY=e.clientY;};
+  canvas.onmousemove=function(e){
+    if(!isDragging)return;
+    zoomOffX+=e.clientX-lastX; zoomOffY+=e.clientY-lastY;
+    lastX=e.clientX; lastY=e.clientY;
+    clampOffset(); drawZoom();
+  };
+  canvas.onmouseup=canvas.onmouseleave=function(){isDragging=false;};
+
+  // Touch events
+  canvas.ontouchstart=function(e){
+    e.preventDefault();
+    if(e.touches.length===1){
+      isDragging=true;
+      lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+    } else if(e.touches.length===2){
+      isDragging=false;
+      pinchStartDist=Math.hypot(
+        e.touches[0].clientX-e.touches[1].clientX,
+        e.touches[0].clientY-e.touches[1].clientY
+      );
+      pinchStartScale=zoomScale;
+    }
+  };
+  canvas.ontouchmove=function(e){
+    e.preventDefault();
+    if(e.touches.length===1&&isDragging){
+      zoomOffX+=e.touches[0].clientX-lastX;
+      zoomOffY+=e.touches[0].clientY-lastY;
+      lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+      clampOffset(); drawZoom();
+    } else if(e.touches.length===2){
+      var dist=Math.hypot(
+        e.touches[0].clientX-e.touches[1].clientX,
+        e.touches[0].clientY-e.touches[1].clientY
+      );
+      var newScale=Math.max(zoomMinScale, Math.min(zoomMaxScale, pinchStartScale*(dist/pinchStartDist)));
+      var canvas2=document.getElementById('zoomCanvas');
+      var cx=(e.touches[0].clientX+e.touches[1].clientX)/2-canvas2.getBoundingClientRect().left;
+      var cy=(e.touches[0].clientY+e.touches[1].clientY)/2-canvas2.getBoundingClientRect().top;
+      zoomOffX=cx-(cx-zoomOffX)*(newScale/zoomScale);
+      zoomOffY=cy-(cy-zoomOffY)*(newScale/zoomScale);
+      zoomScale=newScale;
+      clampOffset(); drawZoom();
+    }
+  };
+  canvas.ontouchend=function(){isDragging=false;};
+}
+
+function scanCropped(){
+  // Crop exactly what's visible on canvas and send to AI
+  var canvas=document.getElementById('zoomCanvas');
+  var out=document.createElement('canvas');
+  out.width=canvas.width; out.height=canvas.height;
+  out.getContext('2d').drawImage(canvas,0,0);
+  var croppedUrl=out.toDataURL('image/jpeg',0.95);
+  var b64=croppedUrl.split(',')[1];
+
+  document.getElementById('zoomSection').style.display='none';
+  document.getElementById('loadingBox').style.display='block';
+  document.getElementById('loadingImg').src=croppedUrl;
+  document.getElementById('progressBar').style.width='0%';
+
+  prepareAndScan(b64, croppedUrl);
+}
+
+function prepareAndScan(b64orig, previewUrl){
+  // Build enhanced + inverted versions
+  var img=new Image();
+  img.onload=function(){
+    var w=img.width, h=img.height;
+
+    // Enhanced contrast
+    var c2=document.createElement('canvas'); c2.width=w; c2.height=h;
+    var ctx2=c2.getContext('2d'); ctx2.drawImage(img,0,0,w,h);
+    var id2=ctx2.getImageData(0,0,w,h); var d2=id2.data;
+    for(var i=0;i<d2.length;i+=4){
+      var g=0.299*d2[i]+0.587*d2[i+1]+0.114*d2[i+2];
+      g=((g-128)*1.8)+128; g=Math.max(0,Math.min(255,g));
+      d2[i]=d2[i+1]=d2[i+2]=g;
+    }
+    ctx2.putImageData(id2,0,0);
+    var b64enh=c2.toDataURL('image/jpeg',0.95).split(',')[1];
+
+    // Inverted
+    var c3=document.createElement('canvas'); c3.width=w; c3.height=h;
+    var ctx3=c3.getContext('2d'); ctx3.drawImage(img,0,0,w,h);
+    var id3=ctx3.getImageData(0,0,w,h); var d3=id3.data;
+    for(var j=0;j<d3.length;j+=4){d3[j]=255-d3[j];d3[j+1]=255-d3[j+1];d3[j+2]=255-d3[j+2];}
+    ctx3.putImageData(id3,0,0);
+    var b64inv=c3.toDataURL('image/jpeg',0.95).split(',')[1];
+
+    callAPI(b64orig, b64enh, b64inv, previewUrl);
+  };
+  img.src='data:image/jpeg;base64,'+b64orig;
+}
+
+var PROMPTS=[
+  'You are an expert OCR system for ISO shipping containers. Carefully examine this image for a container number. It is EXACTLY 11 characters: 4 uppercase letters followed by 7 digits. Example: TIIU6093197. The number may appear horizontal, vertical, or at any angle. Be extremely careful distinguishing: I vs 1, O vs 0, G vs 6, B vs 8, S vs 5, Z vs 2, Q vs 0. Reply with ONLY the 11 characters. No spaces, no explanation. If not found: NOTFOUND',
+  'Shipping container OCR task. Format: [3 letters][U][6 digit serial][1 check digit] = 11 chars total. Common owner codes: TCNU CSNU TIIU MSCU HLXU TGHU GESU TRHU CAIU FSCU CMAU OOLU. Examine EVERY part of the image. Read left to right or top to bottom if vertical. Reply ONLY the 11 chars.',
+  'Look at this container photo. Find the ISO 6346 registration number: exactly 4 capital letters then exactly 7 digits. The 4th letter is almost always U. Scan the entire image. Once found, verify each character one more time. Reply ONLY the raw 11-character code.',
+  'Perform careful character-by-character reading. Structure: Letter Letter Letter Letter Digit Digit Digit Digit Digit Digit Digit. After reading, double-check: 0 vs O? 1 vs I? 6 vs G? 8 vs B? Correct errors then reply ONLY the final 11-character answer.',
+  'Find the container identification code in this image. Rules: exactly 11 chars, first 4 are letters A-Z, last 7 are digits 0-9, 4th letter is usually U. Look at ALL text including sideways or vertical. Reply ONLY the 11-character code.'
 ];
 
 function scanOnce(b64, prompt, n){
-  document.getElementById('scanMsg').textContent = 'Scanning ' + n + ' of 5...';
-  document.getElementById('progressBar').style.width = ((n-1)*18)+'%';
-  return fetch(WORKER, {
-    method:'POST',
-    headers:{'content-type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-opus-4-6',
-      max_tokens:20,
+  document.getElementById('scanMsg').textContent='Scanning '+n+' of 5...';
+  document.getElementById('progressBar').style.width=((n-1)*14)+'%';
+  return fetch(WORKER,{
+    method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({model:'claude-opus-4-6',max_tokens:20,
       messages:[{role:'user',content:[
         {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
         {type:'text',text:prompt}
@@ -336,172 +372,106 @@ function scanOnce(b64, prompt, n){
   })
   .then(function(r){return r.json();})
   .then(function(j){
-    if(j.error) throw new Error(j.error.message);
+    if(j.error)throw new Error(j.error.message);
     return ((j.content&&j.content[0]&&j.content[0].text)||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
   });
 }
 
-function isValidFormat(r){
-  return r && r!=='NOTFOUND' && r.length===11 && /^[A-Z]{4}[0-9]{7}$/.test(r);
-}
+function isValidFormat(r){return r&&r!=='NOTFOUND'&&r.length===11&&/^[A-Z]{4}[0-9]{7}$/.test(r);}
 
-function startScan(b64orig, b64enhanced, b64inverted, imgUrl){
+function callAPI(b64orig, b64enh, b64inv, imgUrl){
   var results=[];
-  // Scan plan: orig x2, enhanced x2, inverted x1 (catches white-on-dark)
-  var scanPlan=[
-    {b64:b64orig,    prompt:PROMPTS[0]},
-    {b64:b64enhanced,prompt:PROMPTS[1]},
-    {b64:b64orig,    prompt:PROMPTS[2]},
-    {b64:b64enhanced,prompt:PROMPTS[3]},
-    {b64:b64inverted,prompt:PROMPTS[4]}  // inverted catches white numbers
+  var plan=[
+    {b64:b64orig,p:PROMPTS[0]},{b64:b64enh,p:PROMPTS[1]},
+    {b64:b64orig,p:PROMPTS[2]},{b64:b64enh,p:PROMPTS[3]},
+    {b64:b64inv,p:PROMPTS[4]}
   ];
-
-  function runScan(i){
-    if(i>=5){ finalize(imgUrl, results, b64orig, b64enhanced, b64inverted); return; }
-    scanOnce(scanPlan[i].b64, scanPlan[i].prompt, i+1)
-    .then(function(r){ results.push(r); runScan(i+1); })
-    .catch(function(e){ results.push('ERR'); runScan(i+1); });
+  function run(i){
+    if(i>=5){finalize(imgUrl,results,b64enh);return;}
+    scanOnce(plan[i].b64,plan[i].p,i+1)
+    .then(function(r){results.push(r);run(i+1);})
+    .catch(function(){results.push('ERR');run(i+1);});
   }
-  runScan(0);
+  run(0);
 }
 
-
-
-
-function finalize(imgUrl, results, b64orig, b64enhanced, b64inverted){
-  document.getElementById('scanMsg').textContent = 'Analyzing results...';
-  document.getElementById('progressBar').style.width = '85%';
-
-  var valid = results.filter(isValidFormat);
-
-  if(valid.length === 0){
-    showResult(imgUrl, '', 'Could not detect any container number. Please type manually.', 0, false, false);
-    return;
-  }
-
-  // Count votes
+function finalize(imgUrl,results,b64enh){
+  document.getElementById('scanMsg').textContent='Double-checking...';
+  document.getElementById('progressBar').style.width='80%';
+  var valid=results.filter(isValidFormat);
+  if(!valid.length){showResult(imgUrl,'','Could not detect. Please type manually.',0,false,false);return;}
   var counts={};
-  valid.forEach(function(r){ counts[r]=(counts[r]||0)+1; });
-  var sorted=Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; });
-  var winner=sorted[0];
-  var votes=counts[winner];
-
-  // If tied, prefer valid check digit
-  if(sorted.length>1 && counts[sorted[0]]===counts[sorted[1]]){
-    if(validateContainer(sorted[1])&&!validateContainer(sorted[0])){ winner=sorted[1]; votes=counts[sorted[1]]; }
+  valid.forEach(function(r){counts[r]=(counts[r]||0)+1;});
+  var sorted=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
+  var winner=sorted[0], votes=counts[winner];
+  if(sorted.length>1&&counts[sorted[0]]===counts[sorted[1]]){
+    if(validateContainer(sorted[1])&&!validateContainer(sorted[0])){winner=sorted[1];votes=counts[sorted[1]];}
   }
 
-  // Final double-check scan — ask AI to verify the winner specifically
-  document.getElementById('scanMsg').textContent = 'Double-checking result...';
-  document.getElementById('progressBar').style.width = '90%';
-
-  // Pick best image version for verification
-  var verifyB64 = b64enhanced;
-  var verifyPrompt = 'I need you to verify a container number. The number I detected is: ' + winner + '. '
-    + 'Please look at this image very carefully and confirm: is "' + winner + '" the correct container number visible in this image? '
-    + 'Check every single character one by one: ' + winner.split('').join(' - ') + '. '
-    + 'If correct, reply EXACTLY: CONFIRMED ' + winner + '. '
-    + 'If wrong, reply the correct 11-character number ONLY with no spaces. '
-    + 'If you cannot tell, reply: UNCERTAIN';
-
-  fetch(WORKER, {
-    method:'POST',
-    headers:{'content-type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-opus-4-6',
-      max_tokens:30,
+  // Final double-check
+  var vp='I detected container number: '+winner+'. Verify by checking each character one by one in this image: '
+    +winner.split('').join(' ')+'. If correct reply: CONFIRMED '+winner+'. If wrong reply the correct 11-char code only. If unsure: UNCERTAIN';
+  fetch(WORKER,{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({model:'claude-opus-4-6',max_tokens:30,
       messages:[{role:'user',content:[
-        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:verifyB64}},
-        {type:'text',text:verifyPrompt}
+        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64enh}},
+        {type:'text',text:vp}
       ]}]
     })
   })
-  .then(function(r){ return r.json(); })
+  .then(function(r){return r.json();})
   .then(function(j){
-    if(j.error) throw new Error(j.error.message);
     var reply=((j.content&&j.content[0]&&j.content[0].text)||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
-    var confirmed = false;
-    var finalNumber = winner;
-
-    if(reply.indexOf('CONFIRMED')===0){
-      // AI confirmed our winner
-      confirmed = true;
-      finalNumber = winner;
-    } else if(isValidFormat(reply)){
-      // AI gave a different number
-      if(reply === winner){
-        confirmed = true;
-        finalNumber = winner;
-      } else {
-        // Disagreement — pick the one with valid check digit, else keep winner
-        if(validateContainer(reply) && !validateContainer(winner)){
-          finalNumber = reply;
-          confirmed = false;
-        } else {
-          finalNumber = winner;
-          confirmed = false;
-        }
-      }
-    } else {
-      // Uncertain — keep winner
-      confirmed = false;
+    var confirmed=false, final=winner;
+    if(reply.indexOf('CONFIRMED')===0){confirmed=true;}
+    else if(isValidFormat(reply)){
+      if(reply===winner){confirmed=true;}
+      else if(validateContainer(reply)&&!validateContainer(winner)){final=reply;}
     }
-
     document.getElementById('progressBar').style.width='100%';
-    showResult(imgUrl, finalNumber, '', votes, validateContainer(finalNumber), confirmed);
+    showResult(imgUrl,final,'',votes,validateContainer(final),confirmed);
   })
   .catch(function(){
-    // If verify fails, still show winner
     document.getElementById('progressBar').style.width='100%';
-    showResult(imgUrl, winner, '', votes, validateContainer(winner), false);
+    showResult(imgUrl,winner,'',votes,validateContainer(winner),false);
   });
 }
 
-// ISO 6346 check digit
 function validateContainer(num){
-  if(!num||num.length!==11) return false;
-  var map={}, v=10;
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l){
-    if(v%11===10) v++;
-    map[l]=v++;
-  });
+  if(!num||num.length!==11)return false;
+  var map={},v=10;
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l){if(v%11===10)v++;map[l]=v++;});
   var sum=0;
-  for(var i=0;i<10;i++){
-    var c=num[i], val=isNaN(c)?map[c]:parseInt(c);
-    if(val===undefined) return false;
-    sum+=val*Math.pow(2,i);
-  }
-  var chk=sum%11; if(chk===10) chk=0;
+  for(var i=0;i<10;i++){var c=num[i],val=isNaN(c)?map[c]:parseInt(c);if(val===undefined)return false;sum+=val*Math.pow(2,i);}
+  var chk=sum%11;if(chk===10)chk=0;
   return chk===parseInt(num[10]);
 }
 
-function showResult(imgUrl, detected, err, votes, checkOk, confirmed){
+function showResult(imgUrl,detected,err,votes,checkOk,confirmed){
   document.getElementById('loadingBox').style.display='none';
   document.getElementById('resultBox').style.display='block';
   document.getElementById('prevImg').src=imgUrl;
   document.getElementById('numInput').value=detected;
   var b=document.getElementById('banner');
   if(detected){
-    var perfect=(confirmed && votes>=3 && checkOk);
-    var good=(votes>=4 && checkOk)||(confirmed && checkOk);
-    b.className=(perfect||good)?'banner ok':votes>=3?'banner warn':'banner warn';
+    var perfect=(confirmed&&votes>=3&&checkOk);
+    var good=(votes>=4&&checkOk)||(confirmed&&checkOk);
+    b.className=(perfect||good)?'banner ok':'banner warn';
     var stars=perfect?'&#9989;&#9989;&#9989;':good?'&#9989;&#9989;':votes>=3?'&#9989;':'&#9888;&#65039;';
     var label=perfect?'100% Confirmed':good?'High Confidence':votes>=3?'Likely Correct':'Please Verify';
-    var detail=(confirmed?'Double-check confirmed + ':votes+'/5 scans agree + ')+(checkOk?'check digit valid':'check digit mismatch - verify manually');
+    var detail=(confirmed?'Double-check confirmed + ':votes+'/5 scans + ')+(checkOk?'check digit valid':'verify manually');
     b.innerHTML=stars+' '+label+': <span style="font-family:monospace;letter-spacing:3px;font-size:16px">'+detected+'</span>'
       +'<br><small style="font-weight:400;font-size:12px">'+detail+'</small>';
-  } else {
-    b.className='banner err';
-    b.textContent=err;
-  }
+  }else{b.className='banner err';b.textContent=err;}
 }
 
 function resetAll(){
   document.getElementById('uploadZone').style.display='block';
-  document.getElementById('cropBox').style.display='none';
+  document.getElementById('zoomSection').style.display='none';
   document.getElementById('loadingBox').style.display='none';
   document.getElementById('resultBox').style.display='none';
   document.getElementById('numInput').value='';
+  zoomImg=null;
 }
 
 function logRecord(){
@@ -509,13 +479,10 @@ function logRecord(){
   if(!n){showToast('Enter a container number');return;}
   var now=new Date();
   records.unshift({id:Date.now(),containerNumber:n,date:now.toLocaleDateString('en-GB'),time:now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})});
-  saveRecords(); showToast(n+' logged!'); resetAll(); renderRecords();
+  saveRecords();showToast(n+' logged!');resetAll();renderRecords();
 }
 
-function delRecord(id){
-  records=records.filter(function(r){return r.id!==id;});
-  saveRecords(); renderRecords(); showToast('Deleted');
-}
+function delRecord(id){records=records.filter(function(r){return r.id!==id;});saveRecords();renderRecords();showToast('Deleted');}
 
 function renderRecords(){
   document.getElementById('totalCount').textContent=records.length;
@@ -541,14 +508,13 @@ function exportCSV(){
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([rows.map(function(r){return r.join(',');}).join('\n')],{type:'text/csv'}));
   a.download='containers-'+new Date().toLocaleDateString('en-GB').replace(/\//g,'-')+'.csv';
-  a.click(); showToast('CSV downloaded!');
+  a.click();showToast('CSV downloaded!');
 }
 
 var tt;
 function showToast(msg){
-  var t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},2500);
+  var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},2500);
 }
 </script>
 </body>
