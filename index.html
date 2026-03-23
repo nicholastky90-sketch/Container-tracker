@@ -208,7 +208,7 @@ function validateContainer(num) {
   return check === parseInt(num[10]);
 }
 
-function showResult(imgUrl, detected, err) {
+function showResult(imgUrl, detected, err, confirmed) {
   document.getElementById('loadingBox').style.display = 'none';
   document.getElementById('resultBox').style.display = 'block';
   document.getElementById('prevImg').src = imgUrl;
@@ -216,13 +216,18 @@ function showResult(imgUrl, detected, err) {
   var b = document.getElementById('banner');
   if (detected) {
     var valid = validateContainer(detected);
-    b.className = valid ? 'banner ok' : 'banner warn';
-    b.innerHTML = (valid ? '&#9989; Verified: ' : '&#9888;&#65039; Unverified: ')
+    var bothMatch = confirmed && valid;
+    b.className = bothMatch ? 'banner ok' : 'banner warn';
+    b.innerHTML = (bothMatch ? '&#9989;&#9989; 100% Confirmed: ' : '&#9888;&#65039; Please verify: ')
       + '<span style="font-family:monospace;letter-spacing:3px;font-size:16px">' + detected + '</span>'
       + '<br><small style="font-weight:400;font-size:12px">'
-      + (valid ? 'Check digit valid — tap Log Record' : 'Check digit FAILED — please verify manually before logging')
+      + (bothMatch ? 'Both AI reads match + check digit valid!' : (err || 'Verify manually before logging'))
       + '</small>';
   } else {
+    b.className = 'banner err';
+    b.textContent = 'Could not read: ' + err;
+  }
+}
     b.className = 'banner err';
     b.textContent = 'Could not read: ' + err;
   }
