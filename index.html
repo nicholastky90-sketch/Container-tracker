@@ -167,6 +167,32 @@ function resizeImage(file, cb) {
   reader.readAsDataURL(file);
 }
 
+// Auto-correct common misreads
+function fixCommonErrors(raw) {
+  if (!raw || raw.length !== 11) return raw;
+  // Position 0-3 are letters, 4-10 are digits
+  var letters = raw.substring(0, 4);
+  var digits  = raw.substring(4, 11);
+  // In letter zone: fix digit-like chars back to letters
+  letters = letters
+    .replace(/0/g, 'O')
+    .replace(/1/g, 'I')
+    .replace(/8/g, 'B');
+  // In digit zone: fix letter-like chars back to digits
+  digits = digits
+    .replace(/O/g, '0')
+    .replace(/Q/g, '0')
+    .replace(/I/g, '1')
+    .replace(/L/g, '1')
+    .replace(/S/g, '5')
+    .replace(/G/g, '6')
+    .replace(/B/g, '8')
+    .replace(/Z/g, '2');
+  // 4th letter must always be U
+  letters = letters.substring(0,3) + 'U';
+  return letters + digits;
+}
+
 function readOnce(b64, prompt, n) {
   document.getElementById('scanMsg').textContent = 'Scanning ' + n + ' of 3...';
   return fetch(WORKER, {
@@ -185,13 +211,14 @@ function readOnce(b64, prompt, n) {
   .then(function(j) {
     if (j.error) throw new Error(j.error.message);
     return ((j.content && j.content[0] && j.content[0].text) || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
-  });
+  })
+  .then(function(raw) { return fixCommonErrors(raw); });
 }
 
 function callAPI(b64, imgUrl) {
-  var p1 = 'Find the ISO shipping container number in this image. Exactly 4 capital letters then 7 digits = 11 chars total. Example: TIIU6093197. May be horizontal, vertical, or at angle. Careful: 0 vs Q, 1 vs I, 6 vs G, 8 vs B. Reply ONLY 11 characters. If unclear: NOTFOUND';
-  var p2 = 'Read the shipping container registration number from this image. Format: 3 owner letters + U + 6 digits + check digit = 11 chars. Common: TCNU CSNU TIIU MSCU HLXU TGHU. May be rotated or small. Read each character carefully. Reply ONLY the 11 chars, nothing else.';
-  var p3 = 'Examine this container image for the identification code. It has exactly 11 characters: 4 letters followed by 7 numbers. Look at all walls, doors, panels. Do not confuse similar characters. Reply ONLY the 11-character code.';
+  var p1 = 'Read the ISO container number from this image. CRITICAL character rules: The letter I has NO serifs on containers - it looks like a plain vertical stroke. L is ONLY used in digits area never in owner code. Common owner codes with I: TIIU TRITON ITTU - the I is a straight line. Format: 4 letters + 7 digits. Example: TIIU6093197. Reply ONLY 11 chars. If unsure: NOTFOUND';
+  var p2 = 'Find shipping container number. IMPORTANT: Do NOT confuse these similar characters: (1) I vs L - owner codes use I not L, (2) I vs C - they are completely different, C is curved, I is straight, (3) U is always the 4th letter in owner code. Common codes: TIIU TCNU CSNU MSCU HLXU TGHU. The number TIIU means T-I-I-U where all middle letters are capital I (straight vertical lines). Reply ONLY the 11-character number.';
+  var p3 = 'You are scanning a shipping container door. The owner code is 3 letters + U. WATCH OUT: The letter I (capital i) appears as a single vertical line on containers - do NOT read it as L or C or 1. The letters in TIIU are: T (has horizontal bars), I (straight line), I (straight line), U (curved bottom). Carefully identify each character. Format: 4 letters then 7 digits = 11 total. Reply ONLY the 11 characters.';
 
   readOnce(b64, p1, 1)
   .then(function(r1) {
