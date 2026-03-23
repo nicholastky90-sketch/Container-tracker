@@ -320,76 +320,42 @@ function scanCropped(){
 }
 
 function prepareAndScan(b64orig, previewUrl){
+  // Build enhanced + inverted versions
   var img=new Image();
   img.onload=function(){
     var w=img.width, h=img.height;
 
-    function makeCanvas(w,h){ var c=document.createElement('canvas');c.width=w;c.height=h;return c; }
-
-    // 1. ORIGINAL — keep as-is
-    var orig64=b64orig;
-
-    // 2. HIGH CONTRAST GRAYSCALE — boost contrast strongly
-    var c2=makeCanvas(w,h); var ctx2=c2.getContext('2d'); ctx2.drawImage(img,0,0,w,h);
+    // Enhanced contrast
+    var c2=document.createElement('canvas'); c2.width=w; c2.height=h;
+    var ctx2=c2.getContext('2d'); ctx2.drawImage(img,0,0,w,h);
     var id2=ctx2.getImageData(0,0,w,h); var d2=id2.data;
     for(var i=0;i<d2.length;i+=4){
-      var g2=0.299*d2[i]+0.587*d2[i+1]+0.114*d2[i+2];
-      g2=((g2-128)*2.2)+128; g2=Math.max(0,Math.min(255,g2));
-      d2[i]=d2[i+1]=d2[i+2]=g2;
+      var g=0.299*d2[i]+0.587*d2[i+1]+0.114*d2[i+2];
+      g=((g-128)*1.8)+128; g=Math.max(0,Math.min(255,g));
+      d2[i]=d2[i+1]=d2[i+2]=g;
     }
     ctx2.putImageData(id2,0,0);
-    var enh64=c2.toDataURL('image/jpeg',0.97).split(',')[1];
+    var b64enh=c2.toDataURL('image/jpeg',0.95).split(',')[1];
 
-    // 3. INVERTED — catches white-on-dark text
-    var c3=makeCanvas(w,h); var ctx3=c3.getContext('2d'); ctx3.drawImage(img,0,0,w,h);
+    // Inverted
+    var c3=document.createElement('canvas'); c3.width=w; c3.height=h;
+    var ctx3=c3.getContext('2d'); ctx3.drawImage(img,0,0,w,h);
     var id3=ctx3.getImageData(0,0,w,h); var d3=id3.data;
     for(var j=0;j<d3.length;j+=4){d3[j]=255-d3[j];d3[j+1]=255-d3[j+1];d3[j+2]=255-d3[j+2];}
     ctx3.putImageData(id3,0,0);
-    var inv64=c3.toDataURL('image/jpeg',0.97).split(',')[1];
+    var b64inv=c3.toDataURL('image/jpeg',0.95).split(',')[1];
 
-    // 4. SHARPENED — unsharp mask to make edges crisp
-    var c4=makeCanvas(w,h); var ctx4=c4.getContext('2d'); ctx4.drawImage(img,0,0,w,h);
-    var id4=ctx4.getImageData(0,0,w,h); var d4=id4.data;
-    // Create blurred version for unsharp mask
-    var cBlur=makeCanvas(w,h); var ctxBlur=cBlur.getContext('2d');
-    ctxBlur.filter='blur(1px)'; ctxBlur.drawImage(img,0,0,w,h);
-    var blurData=ctxBlur.getImageData(0,0,w,h).data;
-    var amount=1.5;
-    for(var k=0;k<d4.length;k+=4){
-      d4[k]  =Math.max(0,Math.min(255, d4[k]  + amount*(d4[k]  -blurData[k])));
-      d4[k+1]=Math.max(0,Math.min(255, d4[k+1]+ amount*(d4[k+1]-blurData[k+1])));
-      d4[k+2]=Math.max(0,Math.min(255, d4[k+2]+ amount*(d4[k+2]-blurData[k+2])));
-    }
-    ctx4.putImageData(id4,0,0);
-    var sharp64=c4.toDataURL('image/jpeg',0.97).split(',')[1];
-
-    // 5. THRESHOLD (black & white) — forces pure black/white, removes noise
-    var c5=makeCanvas(w,h); var ctx5=c5.getContext('2d'); ctx5.drawImage(img,0,0,w,h);
-    var id5=ctx5.getImageData(0,0,w,h); var d5=id5.data;
-    // Compute average brightness first for adaptive threshold
-    var total=0;
-    for(var m=0;m<d5.length;m+=4) total+=0.299*d5[m]+0.587*d5[m+1]+0.114*d5[m+2];
-    var avg=total/(d5.length/4);
-    var thresh=avg*0.95;
-    for(var n=0;n<d5.length;n+=4){
-      var gv=0.299*d5[n]+0.587*d5[n+1]+0.114*d5[n+2];
-      var bw=gv>thresh?255:0;
-      d5[n]=d5[n+1]=d5[n+2]=bw;
-    }
-    ctx5.putImageData(id5,0,0);
-    var thresh64=c5.toDataURL('image/jpeg',0.97).split(',')[1];
-
-    callAPI(orig64, enh64, inv64, sharp64, thresh64, previewUrl);
+    callAPI(b64orig, b64enh, b64inv, previewUrl);
   };
   img.src='data:image/jpeg;base64,'+b64orig;
 }
 
 var PROMPTS=[
-  'You are an expert OCR system for ISO shipping containers. Carefully examine this image for a container number. It is EXACTLY 11 characters: 4 uppercase letters followed by 7 digits. Example: TIIU6093197. The number may appear horizontal, vertical, or at any angle. Be extremely careful distinguishing: I vs 1, O vs 0, G vs 6, B vs 8, S vs 5, Z vs 2, Q vs 0. Reply with ONLY the 11 characters. No spaces, no explanation. If not found: NOTFOUND',
-  'Shipping container OCR task. Format: [3 letters][U][6 digit serial][1 check digit] = 11 chars total. Common owner codes: TCNU CSNU TIIU MSCU HLXU TGHU GESU TRHU CAIU FSCU CMAU OOLU. Examine EVERY part of the image. Read left to right or top to bottom if vertical. Reply ONLY the 11 chars.',
-  'Look at this container photo. Find the ISO 6346 registration number: exactly 4 capital letters then exactly 7 digits. The 4th letter is almost always U. Scan the entire image. Once found, verify each character one more time. Reply ONLY the raw 11-character code.',
-  'Perform careful character-by-character reading. Structure: Letter Letter Letter Letter Digit Digit Digit Digit Digit Digit Digit. After reading, double-check: 0 vs O? 1 vs I? 6 vs G? 8 vs B? Correct errors then reply ONLY the final 11-character answer.',
-  'Find the container identification code in this image. Rules: exactly 11 chars, first 4 are letters A-Z, last 7 are digits 0-9, 4th letter is usually U. Look at ALL text including sideways or vertical. Reply ONLY the 11-character code.'
+  'You are an expert OCR system for ISO shipping containers. Find the container number: EXACTLY 11 chars = 4 uppercase letters + 7 digits. Example: TIIU6093197. May be horizontal, vertical or any angle. CRITICAL character confusions to avoid: I vs 1, I vs R, I vs L, O vs 0, O vs Q, G vs 6, B vs 8, S vs 5, Z vs 2, U vs V. The 2nd and 3rd letters are often I not R or L. Reply ONLY 11 chars. If not found: NOTFOUND',
+  'Shipping container OCR. Format: [3 letters][U][6 digit serial][1 check digit] = 11 chars. Common codes: TCNU CSNU TIIU MSCU HLXU TGHU GESU TRHU CAIU FSCU. IMPORTANT: look carefully at each letter - especially 2nd and 3rd characters which are often I (capital i) not R or L. Examine entire image including vertical text. Reply ONLY 11 chars.',
+  'Find ISO 6346 container number in this image. Exactly 4 letters then 7 digits. 4th letter is almost always U. WATCH OUT: the letter I (capital i) looks like 1, l, or r when text is small or at an angle. Verify each character twice. Reply ONLY the 11-character code.',
+  'Character-by-character container number reading. Format: L-L-L-L-D-D-D-D-D-D-D (L=letter, D=digit). Special attention: distinguish I from R, I from L, I from 1, 0 from O, 6 from G, 8 from B. After reading, re-examine each letter position again. Reply ONLY the 11 chars.',
+  'Container identification code: 4 letters + 7 digits. The text may be vertical, small, or faded. Focus especially on getting each LETTER correct - I vs R vs L are commonly confused. Common owner codes starting with T: TCNU TIIU TRIU TGHU TRHU. Reply ONLY the 11-character code.'
 ];
 
 function scanOnce(b64, prompt, n){
@@ -413,18 +379,15 @@ function scanOnce(b64, prompt, n){
 
 function isValidFormat(r){return r&&r!=='NOTFOUND'&&r.length===11&&/^[A-Z]{4}[0-9]{7}$/.test(r);}
 
-function callAPI(orig64, enh64, inv64, sharp64, thresh64, imgUrl){
+function callAPI(b64orig, b64enh, b64inv, imgUrl){
   var results=[];
-  // Each scan uses a different image version + different prompt
   var plan=[
-    {b64:sharp64,  p:PROMPTS[0]},  // sharpened — best for clear shots
-    {b64:enh64,    p:PROMPTS[1]},  // high contrast — good for faded
-    {b64:inv64,    p:PROMPTS[2]},  // inverted — white on dark
-    {b64:thresh64, p:PROMPTS[3]},  // black & white threshold — removes noise
-    {b64:orig64,   p:PROMPTS[4]}   // original — fallback
+    {b64:b64orig,p:PROMPTS[0]},{b64:b64enh,p:PROMPTS[1]},
+    {b64:b64orig,p:PROMPTS[2]},{b64:b64enh,p:PROMPTS[3]},
+    {b64:b64inv,p:PROMPTS[4]}
   ];
   function run(i){
-    if(i>=5){finalize(imgUrl,results,enh64,sharp64);return;}
+    if(i>=5){finalize(imgUrl,results,b64enh);return;}
     scanOnce(plan[i].b64,plan[i].p,i+1)
     .then(function(r){results.push(r);run(i+1);})
     .catch(function(){results.push('ERR');run(i+1);});
@@ -432,7 +395,7 @@ function callAPI(orig64, enh64, inv64, sharp64, thresh64, imgUrl){
   run(0);
 }
 
-function finalize(imgUrl,results,enh64,sharp64){
+function finalize(imgUrl,results,b64enh){
   document.getElementById('scanMsg').textContent='Double-checking...';
   document.getElementById('progressBar').style.width='80%';
   var valid=results.filter(isValidFormat);
@@ -445,13 +408,13 @@ function finalize(imgUrl,results,enh64,sharp64){
     if(validateContainer(sorted[1])&&!validateContainer(sorted[0])){winner=sorted[1];votes=counts[sorted[1]];}
   }
 
-  // Final double-check using sharpened image
+  // Final double-check
   var vp='I detected container number: '+winner+'. Verify by checking each character one by one in this image: '
     +winner.split('').join(' ')+'. If correct reply: CONFIRMED '+winner+'. If wrong reply the correct 11-char code only. If unsure: UNCERTAIN';
   fetch(WORKER,{method:'POST',headers:{'content-type':'application/json'},
     body:JSON.stringify({model:'claude-opus-4-6',max_tokens:30,
       messages:[{role:'user',content:[
-        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:sharp64}},
+        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64enh}},
         {type:'text',text:vp}
       ]}]
     })
