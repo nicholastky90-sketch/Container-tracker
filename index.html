@@ -127,13 +127,13 @@ function openGal(){ var f=document.getElementById('f2'); f.value=''; f.click(); 
 
 function handleFile(input){
   var file=input.files[0]; if(!file) return;
-  resizeImage(file, function(url, b64){
+  resizeImage(file, function(url, b64orig, b64enhanced, b64inverted){
     document.getElementById('uploadZone').style.display='none';
     document.getElementById('resultBox').style.display='none';
     document.getElementById('loadingBox').style.display='block';
     document.getElementById('loadingImg').src=url;
     document.getElementById('progressBar').style.width='0%';
-    callAPI(b64, url);
+    callAPI(b64orig, b64enhanced, b64inverted, url);
   });
 }
 
@@ -144,10 +144,46 @@ function resizeImage(file, cb){
     img.onload=function(){
       var MAX=1600, w=img.width, h=img.height;
       if(w>MAX||h>MAX){ if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;} }
+
+      // Original image
       var c=document.createElement('canvas'); c.width=w; c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
-      var url=c.toDataURL('image/jpeg',0.95);
-      cb(url, url.split(',')[1]);
+      var ctx=c.getContext('2d');
+      ctx.drawImage(img,0,0,w,h);
+      var orig=c.toDataURL('image/jpeg',0.95);
+
+      // High contrast enhanced version
+      var c2=document.createElement('canvas'); c2.width=w; c2.height=h;
+      var ctx2=c2.getContext('2d');
+      ctx2.drawImage(img,0,0,w,h);
+      var imgData=ctx2.getImageData(0,0,w,h);
+      var d=imgData.data;
+      for(var i=0;i<d.length;i+=4){
+        // Convert to grayscale
+        var gray=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+        // Boost contrast: push darks darker, lights lighter
+        gray=((gray-128)*1.8)+128;
+        // Sharpen brightness curve
+        gray=Math.max(0,Math.min(255,gray));
+        d[i]=d[i+1]=d[i+2]=gray;
+      }
+      ctx2.putImageData(imgData,0,0);
+      var enhanced=c2.toDataURL('image/jpeg',0.95);
+
+      // Inverted version (white text becomes black - easier to read)
+      var c3=document.createElement('canvas'); c3.width=w; c3.height=h;
+      var ctx3=c3.getContext('2d');
+      ctx3.drawImage(img,0,0,w,h);
+      var imgData3=ctx3.getImageData(0,0,w,h);
+      var d3=imgData3.data;
+      for(var j=0;j<d3.length;j+=4){
+        d3[j]=255-d3[j];
+        d3[j+1]=255-d3[j+1];
+        d3[j+2]=255-d3[j+2];
+      }
+      ctx3.putImageData(imgData3,0,0);
+      var inverted=c3.toDataURL('image/jpeg',0.95);
+
+      cb(orig, orig.split(',')[1], enhanced.split(',')[1], inverted.split(',')[1]);
     };
     img.src=e.target.result;
   };
@@ -193,58 +229,115 @@ function isValidFormat(r){
   return r && r!=='NOTFOUND' && r.length===11 && /^[A-Z]{4}[0-9]{7}$/.test(r);
 }
 
-function callAPI(b64, imgUrl){
+function callAPI(b64orig, b64enhanced, b64inverted, imgUrl){
   var results=[];
+  // Scan plan: orig x2, enhanced x2, inverted x1 (catches white-on-dark)
+  var scanPlan=[
+    {b64:b64orig,    prompt:PROMPTS[0]},
+    {b64:b64enhanced,prompt:PROMPTS[1]},
+    {b64:b64orig,    prompt:PROMPTS[2]},
+    {b64:b64enhanced,prompt:PROMPTS[3]},
+    {b64:b64inverted,prompt:PROMPTS[4]}  // inverted catches white numbers
+  ];
 
-  // Run all 5 scans sequentially
   function runScan(i){
-    if(i>=5){
-      finalize(imgUrl, results);
-      return;
-    }
-    scanOnce(b64, PROMPTS[i], i+1)
-    .then(function(r){
-      results.push(r);
-      runScan(i+1);
-    })
-    .catch(function(e){
-      results.push('ERROR:'+e.message);
-      runScan(i+1);
-    });
+    if(i>=5){ finalize(imgUrl, results, b64orig, b64enhanced, b64inverted); return; }
+    scanOnce(scanPlan[i].b64, scanPlan[i].prompt, i+1)
+    .then(function(r){ results.push(r); runScan(i+1); })
+    .catch(function(e){ results.push('ERR'); runScan(i+1); });
   }
   runScan(0);
 }
 
-function finalize(imgUrl, results){
+
+
+function finalize(imgUrl, results, b64orig, b64enhanced, b64inverted){
   document.getElementById('scanMsg').textContent = 'Analyzing results...';
-  document.getElementById('progressBar').style.width = '95%';
+  document.getElementById('progressBar').style.width = '85%';
 
   var valid = results.filter(isValidFormat);
 
   if(valid.length === 0){
-    showResult(imgUrl, '', 'Could not detect any container number. Please type manually.', 0, false);
+    showResult(imgUrl, '', 'Could not detect any container number. Please type manually.', 0, false, false);
     return;
   }
 
-  // Count votes for each candidate
+  // Count votes
   var counts={};
   valid.forEach(function(r){ counts[r]=(counts[r]||0)+1; });
-
-  // Sort by votes
   var sorted=Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; });
   var winner=sorted[0];
   var votes=counts[winner];
 
-  // If top 2 are tied, prefer the one with valid check digit
+  // If tied, prefer valid check digit
   if(sorted.length>1 && counts[sorted[0]]===counts[sorted[1]]){
-    if(validateContainer(sorted[1]) && !validateContainer(sorted[0])){
-      winner=sorted[1]; votes=counts[sorted[1]];
-    }
+    if(validateContainer(sorted[1])&&!validateContainer(sorted[0])){ winner=sorted[1]; votes=counts[sorted[1]]; }
   }
 
-  var checkOk=validateContainer(winner);
-  document.getElementById('progressBar').style.width='100%';
-  showResult(imgUrl, winner, '', votes, checkOk);
+  // Final double-check scan — ask AI to verify the winner specifically
+  document.getElementById('scanMsg').textContent = 'Double-checking result...';
+  document.getElementById('progressBar').style.width = '90%';
+
+  // Pick best image version for verification
+  var verifyB64 = b64enhanced;
+  var verifyPrompt = 'I need you to verify a container number. The number I detected is: ' + winner + '. '
+    + 'Please look at this image very carefully and confirm: is "' + winner + '" the correct container number visible in this image? '
+    + 'Check every single character one by one: ' + winner.split('').join(' - ') + '. '
+    + 'If correct, reply EXACTLY: CONFIRMED ' + winner + '. '
+    + 'If wrong, reply the correct 11-character number ONLY with no spaces. '
+    + 'If you cannot tell, reply: UNCERTAIN';
+
+  fetch(WORKER, {
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-opus-4-6',
+      max_tokens:30,
+      messages:[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:verifyB64}},
+        {type:'text',text:verifyPrompt}
+      ]}]
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(j){
+    if(j.error) throw new Error(j.error.message);
+    var reply=((j.content&&j.content[0]&&j.content[0].text)||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+    var confirmed = false;
+    var finalNumber = winner;
+
+    if(reply.indexOf('CONFIRMED')===0){
+      // AI confirmed our winner
+      confirmed = true;
+      finalNumber = winner;
+    } else if(isValidFormat(reply)){
+      // AI gave a different number
+      if(reply === winner){
+        confirmed = true;
+        finalNumber = winner;
+      } else {
+        // Disagreement — pick the one with valid check digit, else keep winner
+        if(validateContainer(reply) && !validateContainer(winner)){
+          finalNumber = reply;
+          confirmed = false;
+        } else {
+          finalNumber = winner;
+          confirmed = false;
+        }
+      }
+    } else {
+      // Uncertain — keep winner
+      confirmed = false;
+    }
+
+    document.getElementById('progressBar').style.width='100%';
+    showResult(imgUrl, finalNumber, '', votes, validateContainer(finalNumber), confirmed);
+  })
+  .catch(function(){
+    // If verify fails, still show winner
+    document.getElementById('progressBar').style.width='100%';
+    showResult(imgUrl, winner, '', votes, validateContainer(winner), false);
+  });
 }
 
 // ISO 6346 check digit
@@ -265,20 +358,19 @@ function validateContainer(num){
   return chk===parseInt(num[10]);
 }
 
-function showResult(imgUrl, detected, err, votes, checkOk){
+function showResult(imgUrl, detected, err, votes, checkOk, confirmed){
   document.getElementById('loadingBox').style.display='none';
   document.getElementById('resultBox').style.display='block';
   document.getElementById('prevImg').src=imgUrl;
   document.getElementById('numInput').value=detected;
   var b=document.getElementById('banner');
   if(detected){
-    var perfect=(votes>=4&&checkOk)||(votes===5);
-    var good=(votes>=3&&checkOk)||(votes>=4);
-    var ok=(votes>=2||checkOk);
-    b.className=perfect?'banner ok':good?'banner ok':ok?'banner warn':'banner warn';
-    var stars=votes>=5?'&#9989;&#9989;&#9989;':votes>=4?'&#9989;&#9989;&#9989;':votes>=3?'&#9989;&#9989;':votes>=2?'&#9989;':'&#9888;&#65039;';
-    var label=perfect?'100% Confirmed':good?'High Confidence':ok?'Likely Correct':'Please Verify';
-    var detail=votes+'/5 scans agree'+(checkOk?' + check digit valid':' (check digit mismatch - verify)');
+    var perfect=(confirmed && votes>=3 && checkOk);
+    var good=(votes>=4 && checkOk)||(confirmed && checkOk);
+    b.className=(perfect||good)?'banner ok':votes>=3?'banner warn':'banner warn';
+    var stars=perfect?'&#9989;&#9989;&#9989;':good?'&#9989;&#9989;':votes>=3?'&#9989;':'&#9888;&#65039;';
+    var label=perfect?'100% Confirmed':good?'High Confidence':votes>=3?'Likely Correct':'Please Verify';
+    var detail=(confirmed?'Double-check confirmed + ':votes+'/5 scans agree + ')+(checkOk?'check digit valid':'check digit mismatch - verify manually');
     b.innerHTML=stars+' '+label+': <span style="font-family:monospace;letter-spacing:3px;font-size:16px">'+detected+'</span>'
       +'<br><small style="font-weight:400;font-size:12px">'+detail+'</small>';
   } else {
