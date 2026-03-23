@@ -23,26 +23,30 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 .btn-upload-gal{display:block;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#e2e8f0;font-weight:700;font-size:18px;font-family:monospace;text-transform:uppercase;border-radius:12px;padding:18px;cursor:pointer;letter-spacing:2px}
 
 /* ZOOM EDITOR */
-.zoom-box{display:none;border:2px solid rgba(14,165,233,.4);border-radius:14px;overflow:hidden;background:#000;margin-bottom:12px;position:relative}
-.zoom-hint{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;font-size:11px;padding:5px 12px;border-radius:20px;white-space:nowrap;pointer-events:none;z-index:10;font-family:monospace}
-.zoom-canvas{display:block;width:100%;touch-action:none;cursor:grab}
-.zoom-canvas:active{cursor:grabbing}
-.zoom-controls{display:flex;gap:8px;padding:10px;background:rgba(0,0,0,.4)}
-.btn-zoom-in{flex:1;background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);color:#0ea5e9;font-size:20px;font-weight:700;border-radius:8px;padding:10px;cursor:pointer}
-.btn-zoom-out{flex:1;background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);color:#0ea5e9;font-size:20px;font-weight:700;border-radius:8px;padding:10px;cursor:pointer}
-.btn-zoom-reset{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#94a3b8;font-size:12px;font-weight:700;border-radius:8px;padding:10px;cursor:pointer;font-family:monospace;text-transform:uppercase}
+#zoomSection{display:none}
+.zoom-label{font-family:monospace;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#0ea5e9;margin-bottom:8px;text-align:center}
+.zoom-wrap{position:relative;width:100%;background:#000;border-radius:12px;overflow:hidden;border:2px solid rgba(14,165,233,.4);touch-action:none;user-select:none}
+#zoomCanvas{display:block;width:100%;height:300px;cursor:grab}
+#zoomCanvas:active{cursor:grabbing}
+/* Red selection box drawn on canvas */
+.zoom-btns{display:flex;gap:8px;margin-top:8px}
+.zbtn{flex:1;border-radius:8px;padding:12px;font-size:18px;font-weight:700;cursor:pointer;border:none}
+.zbtn-plus{background:rgba(14,165,233,.2);border:1px solid rgba(14,165,233,.4)!important;color:#0ea5e9}
+.zbtn-minus{background:rgba(14,165,233,.2);border:1px solid rgba(14,165,233,.4)!important;color:#0ea5e9}
+.zbtn-reset{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)!important;color:#64748b;font-size:11px;font-family:monospace;text-transform:uppercase;letter-spacing:1px}
+.zoom-info{text-align:center;font-size:11px;color:#475569;margin-top:6px;font-family:monospace}
 .btn-scan-now{display:block;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-weight:700;font-size:17px;font-family:monospace;text-transform:uppercase;border:none;border-radius:12px;padding:16px;cursor:pointer;letter-spacing:2px;margin-top:10px}
-.btn-zoom-cancel{display:block;width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#475569;font-family:monospace;font-size:13px;font-weight:700;text-transform:uppercase;border-radius:10px;padding:13px;cursor:pointer;margin-top:8px}
+.btn-zoom-cancel{display:block;width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#475569;font-family:monospace;font-size:13px;font-weight:700;text-transform:uppercase;border-radius:10px;padding:12px;cursor:pointer;margin-top:8px}
 
 .loading{display:none;border:2px dashed rgba(14,165,233,.3);border-radius:14px;padding:24px 14px;text-align:center;background:rgba(14,165,233,.04)}
-.loading img{width:100%;max-height:190px;object-fit:cover;border-radius:10px;margin-bottom:18px}
+.loading img{width:100%;max-height:220px;object-fit:contain;border-radius:10px;margin-bottom:18px;background:#000}
 .spin-row{display:inline-flex;align-items:center;gap:10px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);border-radius:30px;padding:12px 22px;color:#0ea5e9;font-size:14px;font-weight:600}
 .spinner{width:16px;height:16px;border:2.5px solid rgba(14,165,233,.3);border-top-color:#0ea5e9;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 .progress{width:100%;background:rgba(255,255,255,.08);border-radius:99px;height:6px;margin-top:14px;overflow:hidden}
 .progress-bar{height:6px;background:linear-gradient(90deg,#0ea5e9,#38bdf8);border-radius:99px;transition:width .4s ease;width:0%}
 @keyframes spin{to{transform:rotate(360deg)}}
 .result{display:none}
-.prev-img{width:100%;max-height:210px;object-fit:cover;display:block;border-radius:12px 12px 0 0}
+.prev-img{width:100%;max-height:220px;object-fit:contain;display:block;border-radius:12px 12px 0 0;background:#000}
 .prev-bar{display:flex;justify-content:flex-end;padding:8px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-top:none;border-radius:0 0 12px 12px;margin-bottom:12px}
 .btn-clr{background:none;border:1px solid rgba(255,255,255,.1);color:#475569;border-radius:6px;padding:4px 14px;font-size:12px;cursor:pointer}
 .banner{padding:12px 14px;border-radius:10px;font-size:14px;margin-bottom:12px;font-weight:600;line-height:1.6}
@@ -80,7 +84,7 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
     <div class="logo">&#128674;</div>
     <div>
       <div class="title">Container Tracker</div>
-      <div class="sub">Zoom &rarr; Crop &rarr; AI Scan &rarr; Log</div>
+      <div class="sub">Zoom &rarr; Lock &rarr; AI Scan &rarr; Log</div>
     </div>
     <div class="badge">
       <div class="badge-n" id="totalCount">0</div>
@@ -88,38 +92,36 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
     </div>
   </div>
 
-  <!-- Upload Zone -->
   <div class="zone" id="uploadZone">
     <span class="zone-icon">&#128230;</span>
     <div class="zone-h">Scan Container</div>
-    <p class="zone-p">Take or upload a photo, zoom into the number, then scan.</p>
+    <p class="zone-p">Zoom into the container number, lock the area, then scan for maximum accuracy.</p>
     <button class="btn-upload" onclick="openCam()">&#128247;&nbsp; OPEN CAMERA</button>
     <button class="btn-upload-gal" onclick="openGal()">&#128444;&nbsp; CHOOSE FROM GALLERY</button>
   </div>
 
   <!-- Zoom Editor -->
-  <div id="zoomSection" style="display:none">
-    <div class="zoom-box" id="zoomBox">
-      <div class="zoom-hint" id="zoomHint">&#128269; Pinch or use buttons to zoom &bull; Drag to pan</div>
-      <canvas id="zoomCanvas" class="zoom-canvas" height="300"></canvas>
-      <div class="zoom-controls">
-        <button class="btn-zoom-in" onclick="zoomIn()">+</button>
-        <button class="btn-zoom-out" onclick="zoomOut()">&#8722;</button>
-        <button class="btn-zoom-reset" onclick="zoomReset()">Reset</button>
-      </div>
+  <div id="zoomSection">
+    <div class="zoom-label">&#128269; Zoom &amp; Pan to the container number</div>
+    <div class="zoom-wrap" id="zoomWrap">
+      <canvas id="zoomCanvas"></canvas>
     </div>
-    <button class="btn-scan-now" onclick="scanCropped()">&#128269; SCAN THIS AREA</button>
+    <div class="zoom-btns">
+      <button class="zbtn zbtn-plus" onclick="doZoom(1.4)">+</button>
+      <button class="zbtn zbtn-minus" onclick="doZoom(0.71)">&#8722;</button>
+      <button class="zbtn zbtn-reset" onclick="zoomReset()">Reset</button>
+    </div>
+    <div class="zoom-info" id="zoomInfo">Zoom: 1.0x</div>
+    <button class="btn-scan-now" onclick="scanCropped()">&#128247; LOCK &amp; SCAN THIS AREA</button>
     <button class="btn-zoom-cancel" onclick="resetAll()">&#8617; Cancel</button>
   </div>
 
-  <!-- Loading -->
   <div class="loading" id="loadingBox">
     <img id="loadingImg" src="" alt="">
     <div class="spin-row"><div class="spinner"></div><span id="scanMsg">Preparing...</span></div>
     <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
   </div>
 
-  <!-- Result -->
   <div class="result" id="resultBox">
     <img class="prev-img" id="prevImg" src="" alt="">
     <div class="prev-bar"><button class="btn-clr" onclick="resetAll()">&#10005; Clear</button></div>
@@ -156,11 +158,13 @@ window.onload=function(){renderRecords();};
 function openCam(){var f=document.getElementById('f1');f.value='';f.click();}
 function openGal(){var f=document.getElementById('f2');f.value='';f.click();}
 
-// ---- ZOOM STATE ----
-var zoomImg=null, zoomScale=1, zoomMinScale=1, zoomMaxScale=8;
-var zoomOffX=0, zoomOffY=0;
-var isDragging=false, lastX=0, lastY=0;
-var pinchStartDist=0, pinchStartScale=1;
+// ========== ZOOM ENGINE ==========
+var origImg = null;   // original Image object (full resolution)
+var vx=0, vy=0;      // top-left corner of visible region in ORIGINAL image coords
+var vw=0, vh=0;      // size of visible region in ORIGINAL image coords
+var canvasW=0, canvasH=300;
+var isDrag=false, dragStartX=0, dragStartY=0, dragVX=0, dragVY=0;
+var pinchStartDist=0, pinchStartVW=0, pinchStartVH=0, pinchStartVX=0, pinchStartVY=0;
 
 function handleFile(input){
   var file=input.files[0]; if(!file) return;
@@ -168,171 +172,145 @@ function handleFile(input){
   reader.onload=function(e){
     var img=new Image();
     img.onload=function(){
-      zoomImg=img;
+      origImg=img;
       document.getElementById('uploadZone').style.display='none';
       document.getElementById('zoomSection').style.display='block';
-      document.getElementById('zoomBox').style.display='block';
-      initZoomCanvas();
-      setTimeout(function(){document.getElementById('zoomHint').style.opacity='0';},3000);
+      setupCanvas();
     };
     img.src=e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-function initZoomCanvas(){
-  var canvas=document.getElementById('zoomCanvas');
-  var wrap=canvas.parentElement;
-  canvas.width=wrap.clientWidth||360;
-  canvas.height=300;
-  zoomScale=1; zoomOffX=0; zoomOffY=0;
-  // Fit image to canvas
-  var scaleX=canvas.width/zoomImg.width;
-  var scaleY=canvas.height/zoomImg.height;
-  zoomMinScale=Math.min(scaleX,scaleY);
-  zoomScale=zoomMinScale;
-  zoomOffX=(canvas.width-zoomImg.width*zoomScale)/2;
-  zoomOffY=(canvas.height-zoomImg.height*zoomScale)/2;
-  drawZoom();
-  bindZoomEvents();
-}
-
-function drawZoom(){
-  var canvas=document.getElementById('zoomCanvas');
-  var ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle='#000';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.drawImage(zoomImg, zoomOffX, zoomOffY, zoomImg.width*zoomScale, zoomImg.height*zoomScale);
-  // Draw crosshair guide
-  ctx.strokeStyle='rgba(14,165,233,0.3)';
-  ctx.lineWidth=1;
-  ctx.setLineDash([4,4]);
-  ctx.strokeRect(canvas.width*0.1, canvas.height*0.1, canvas.width*0.8, canvas.height*0.8);
-  ctx.setLineDash([]);
-}
-
-function clampOffset(){
-  var canvas=document.getElementById('zoomCanvas');
-  var imgW=zoomImg.width*zoomScale, imgH=zoomImg.height*zoomScale;
-  var maxX=canvas.width*0.9, minX=canvas.width*0.1-imgW;
-  var maxY=canvas.height*0.9, minY=canvas.height*0.1-imgH;
-  zoomOffX=Math.max(minX,Math.min(maxX,zoomOffX));
-  zoomOffY=Math.max(minY,Math.min(maxY,zoomOffY));
-}
-
-function zoomIn(){
-  var canvas=document.getElementById('zoomCanvas');
-  var cx=canvas.width/2, cy=canvas.height/2;
-  var prevScale=zoomScale;
-  zoomScale=Math.min(zoomMaxScale, zoomScale*1.4);
-  zoomOffX=cx-(cx-zoomOffX)*(zoomScale/prevScale);
-  zoomOffY=cy-(cy-zoomOffY)*(zoomScale/prevScale);
-  clampOffset(); drawZoom();
-}
-
-function zoomOut(){
-  var canvas=document.getElementById('zoomCanvas');
-  var cx=canvas.width/2, cy=canvas.height/2;
-  var prevScale=zoomScale;
-  zoomScale=Math.max(zoomMinScale, zoomScale/1.4);
-  zoomOffX=cx-(cx-zoomOffX)*(zoomScale/prevScale);
-  zoomOffY=cy-(cy-zoomOffY)*(zoomScale/prevScale);
-  clampOffset(); drawZoom();
+function setupCanvas(){
+  var wrap=document.getElementById('zoomWrap');
+  canvasW=wrap.clientWidth||360;
+  canvasH=300;
+  var c=document.getElementById('zoomCanvas');
+  c.width=canvasW; c.height=canvasH;
+  c.style.width=canvasW+'px'; c.style.height=canvasH+'px';
+  zoomReset();
+  bindEvents(c);
 }
 
 function zoomReset(){
-  var canvas=document.getElementById('zoomCanvas');
-  zoomScale=zoomMinScale;
-  zoomOffX=(canvas.width-zoomImg.width*zoomScale)/2;
-  zoomOffY=(canvas.height-zoomImg.height*zoomScale)/2;
-  drawZoom();
+  // Fit entire image into canvas
+  var imgAspect=origImg.width/origImg.height;
+  var canAspect=canvasW/canvasH;
+  if(imgAspect>canAspect){ vw=origImg.width; vh=Math.round(origImg.width/canAspect); }
+  else { vh=origImg.height; vw=Math.round(origImg.height*canAspect); }
+  vx=Math.round((origImg.width-vw)/2);
+  vy=Math.round((origImg.height-vh)/2);
+  clamp(); draw();
 }
 
-function bindZoomEvents(){
-  var canvas=document.getElementById('zoomCanvas');
+function doZoom(factor){
+  // Zoom toward center of visible region
+  var cx=vx+vw/2, cy=vy+vh/2;
+  var minVW=Math.round(canvasW/8); // max zoom = 8x
+  var maxVW=origImg.width*2;       // min zoom = fit
+  var newVW=Math.max(minVW, Math.min(maxVW, Math.round(vw*factor)));
+  var newVH=Math.round(newVW*(canvasH/canvasW));
+  vx=Math.round(cx-newVW/2); vy=Math.round(cy-newVH/2);
+  vw=newVW; vh=newVH;
+  clamp(); draw();
+}
 
-  // Mouse events
-  canvas.onmousedown=function(e){isDragging=true;lastX=e.clientX;lastY=e.clientY;};
-  canvas.onmousemove=function(e){
-    if(!isDragging)return;
-    zoomOffX+=e.clientX-lastX; zoomOffY+=e.clientY-lastY;
-    lastX=e.clientX; lastY=e.clientY;
-    clampOffset(); drawZoom();
+function clamp(){
+  // Keep view within image bounds (allow slight overflow for small images)
+  vx=Math.max(-Math.round(vw*0.1), Math.min(origImg.width-Math.round(vw*0.9), vx));
+  vy=Math.max(-Math.round(vh*0.1), Math.min(origImg.height-Math.round(vh*0.9), vy));
+}
+
+function draw(){
+  var c=document.getElementById('zoomCanvas');
+  var ctx=c.getContext('2d');
+  ctx.clearRect(0,0,canvasW,canvasH);
+  ctx.fillStyle='#111'; ctx.fillRect(0,0,canvasW,canvasH);
+  // Draw the visible region of original image onto full canvas
+  ctx.drawImage(origImg, vx, vy, vw, vh, 0, 0, canvasW, canvasH);
+  // Overlay: show current zoom level
+  var zoom=(origImg.width/vw).toFixed(1);
+  document.getElementById('zoomInfo').textContent='Zoom: '+zoom+'x — visible area locked for scan';
+  // Draw border highlight
+  ctx.strokeStyle='rgba(14,165,233,0.6)'; ctx.lineWidth=3;
+  ctx.strokeRect(2,2,canvasW-4,canvasH-4);
+}
+
+function bindEvents(c){
+  // Mouse drag
+  c.onmousedown=function(e){
+    isDrag=true;
+    dragStartX=e.clientX; dragStartY=e.clientY;
+    dragVX=vx; dragVY=vy;
   };
-  canvas.onmouseup=canvas.onmouseleave=function(){isDragging=false;};
+  c.onmousemove=function(e){
+    if(!isDrag) return;
+    var dx=e.clientX-dragStartX, dy=e.clientY-dragStartY;
+    // Convert screen pixels to image pixels
+    vx=dragVX - Math.round(dx*(vw/canvasW));
+    vy=dragVY - Math.round(dy*(vh/canvasH));
+    clamp(); draw();
+  };
+  c.onmouseup=c.onmouseleave=function(){isDrag=false;};
 
-  // Touch events
-  canvas.ontouchstart=function(e){
+  // Touch drag + pinch
+  c.ontouchstart=function(e){
     e.preventDefault();
     if(e.touches.length===1){
-      isDragging=true;
-      lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
+      isDrag=true;
+      dragStartX=e.touches[0].clientX; dragStartY=e.touches[0].clientY;
+      dragVX=vx; dragVY=vy;
     } else if(e.touches.length===2){
-      isDragging=false;
+      isDrag=false;
       pinchStartDist=Math.hypot(
-        e.touches[0].clientX-e.touches[1].clientX,
-        e.touches[0].clientY-e.touches[1].clientY
-      );
-      pinchStartScale=zoomScale;
+        e.touches[1].clientX-e.touches[0].clientX,
+        e.touches[1].clientY-e.touches[0].clientY);
+      pinchStartVW=vw; pinchStartVH=vh;
+      pinchStartVX=vx; pinchStartVY=vy;
     }
   };
-  canvas.ontouchmove=function(e){
+  c.ontouchmove=function(e){
     e.preventDefault();
-    if(e.touches.length===1&&isDragging){
-      zoomOffX+=e.touches[0].clientX-lastX;
-      zoomOffY+=e.touches[0].clientY-lastY;
-      lastX=e.touches[0].clientX; lastY=e.touches[0].clientY;
-      clampOffset(); drawZoom();
+    if(e.touches.length===1&&isDrag){
+      var dx=e.touches[0].clientX-dragStartX, dy=e.touches[0].clientY-dragStartY;
+      vx=dragVX - Math.round(dx*(vw/canvasW));
+      vy=dragVY - Math.round(dy*(vh/canvasH));
+      clamp(); draw();
     } else if(e.touches.length===2){
       var dist=Math.hypot(
-        e.touches[0].clientX-e.touches[1].clientX,
-        e.touches[0].clientY-e.touches[1].clientY
-      );
-      var newScale=Math.max(zoomMinScale, Math.min(zoomMaxScale, pinchStartScale*(dist/pinchStartDist)));
-      var canvas2=document.getElementById('zoomCanvas');
-      var cx=(e.touches[0].clientX+e.touches[1].clientX)/2-canvas2.getBoundingClientRect().left;
-      var cy=(e.touches[0].clientY+e.touches[1].clientY)/2-canvas2.getBoundingClientRect().top;
-      zoomOffX=cx-(cx-zoomOffX)*(newScale/zoomScale);
-      zoomOffY=cy-(cy-zoomOffY)*(newScale/zoomScale);
-      zoomScale=newScale;
-      clampOffset(); drawZoom();
+        e.touches[1].clientX-e.touches[0].clientX,
+        e.touches[1].clientY-e.touches[0].clientY);
+      var ratio=pinchStartDist/dist; // >1 = zoom in (smaller region), <1 = zoom out
+      var minVW=Math.round(canvasW/8);
+      var maxVW=origImg.width*2;
+      var newVW=Math.max(minVW,Math.min(maxVW,Math.round(pinchStartVW*ratio)));
+      var newVH=Math.round(newVW*(canvasH/canvasW));
+      // Zoom toward pinch center
+      var pcx=((e.touches[0].clientX+e.touches[1].clientX)/2);
+      var pcy=((e.touches[0].clientY+e.touches[1].clientY)/2);
+      var rect=c.getBoundingClientRect();
+      var cx=pinchStartVX+((pcx-rect.left)/canvasW)*pinchStartVW;
+      var cy=pinchStartVY+((pcy-rect.top)/canvasH)*pinchStartVH;
+      vx=Math.round(cx-newVW/2); vy=Math.round(cy-newVH/2);
+      vw=newVW; vh=newVH;
+      clamp(); draw();
     }
   };
-  canvas.ontouchend=function(){isDragging=false;};
+  c.ontouchend=function(e){if(e.touches.length===0)isDrag=false;};
 }
 
 function scanCropped(){
-  var canvas=document.getElementById('zoomCanvas');
-  var cw=canvas.width, ch=canvas.height;
+  // Crop EXACTLY the locked region from original image at high resolution
+  var outW=1400, outH=Math.round(1400*(vh/vw));
+  var cropCanvas=document.createElement('canvas');
+  cropCanvas.width=outW; cropCanvas.height=outH;
+  var ctx=cropCanvas.getContext('2d');
+  // Draw only the locked region (vx,vy,vw,vh) from original image
+  ctx.drawImage(origImg, vx, vy, vw, vh, 0, 0, outW, outH);
 
-  // Calculate what portion of the ORIGINAL image is visible on canvas
-  // zoomOffX/Y is where the image is drawn on canvas
-  // So visible region of original image:
-  var srcX = -zoomOffX / zoomScale;
-  var srcY = -zoomOffY / zoomScale;
-  var srcW = cw / zoomScale;
-  var srcH = ch / zoomScale;
-
-  // Clamp to image bounds
-  srcX = Math.max(0, srcX);
-  srcY = Math.max(0, srcY);
-  srcW = Math.min(zoomImg.width - srcX, srcW);
-  srcH = Math.min(zoomImg.height - srcY, srcH);
-
-  // Render the cropped area at HIGH resolution (2x for sharpness)
-  var outSize = 1200;
-  var out = document.createElement('canvas');
-  var aspect = srcW / srcH;
-  if(aspect > 1){ out.width=outSize; out.height=Math.round(outSize/aspect); }
-  else { out.height=outSize; out.width=Math.round(outSize*aspect); }
-
-  var ctx = out.getContext('2d');
-  // Draw only the visible/zoomed region from original image at high res
-  ctx.drawImage(zoomImg, srcX, srcY, srcW, srcH, 0, 0, out.width, out.height);
-
-  var croppedUrl = out.toDataURL('image/jpeg', 0.97);
-  var b64 = croppedUrl.split(',')[1];
+  var croppedUrl=cropCanvas.toDataURL('image/jpeg',0.97);
+  var b64=croppedUrl.split(',')[1];
 
   document.getElementById('zoomSection').style.display='none';
   document.getElementById('loadingBox').style.display='block';
@@ -343,30 +321,29 @@ function scanCropped(){
 }
 
 function prepareAndScan(b64orig, previewUrl){
-  // Build enhanced + inverted versions
   var img=new Image();
   img.onload=function(){
     var w=img.width, h=img.height;
 
-    // Enhanced contrast
+    // Enhanced contrast version
     var c2=document.createElement('canvas'); c2.width=w; c2.height=h;
     var ctx2=c2.getContext('2d'); ctx2.drawImage(img,0,0,w,h);
     var id2=ctx2.getImageData(0,0,w,h); var d2=id2.data;
     for(var i=0;i<d2.length;i+=4){
       var g=0.299*d2[i]+0.587*d2[i+1]+0.114*d2[i+2];
-      g=((g-128)*1.8)+128; g=Math.max(0,Math.min(255,g));
+      g=((g-128)*2.0)+128; g=Math.max(0,Math.min(255,g));
       d2[i]=d2[i+1]=d2[i+2]=g;
     }
     ctx2.putImageData(id2,0,0);
-    var b64enh=c2.toDataURL('image/jpeg',0.95).split(',')[1];
+    var b64enh=c2.toDataURL('image/jpeg',0.97).split(',')[1];
 
-    // Inverted
+    // Inverted version (white text on dark)
     var c3=document.createElement('canvas'); c3.width=w; c3.height=h;
     var ctx3=c3.getContext('2d'); ctx3.drawImage(img,0,0,w,h);
     var id3=ctx3.getImageData(0,0,w,h); var d3=id3.data;
     for(var j=0;j<d3.length;j+=4){d3[j]=255-d3[j];d3[j+1]=255-d3[j+1];d3[j+2]=255-d3[j+2];}
     ctx3.putImageData(id3,0,0);
-    var b64inv=c3.toDataURL('image/jpeg',0.95).split(',')[1];
+    var b64inv=c3.toDataURL('image/jpeg',0.97).split(',')[1];
 
     callAPI(b64orig, b64enh, b64inv, previewUrl);
   };
@@ -374,19 +351,19 @@ function prepareAndScan(b64orig, previewUrl){
 }
 
 var PROMPTS=[
-  'You are an expert OCR system for ISO shipping containers. Find the container number: EXACTLY 11 chars = 4 uppercase letters + 7 digits. Example: TIIU6093197. May be horizontal, vertical or any angle. CRITICAL character confusions to avoid: I vs 1, I vs R, I vs L, O vs 0, O vs Q, G vs 6, B vs 8, S vs 5, Z vs 2, U vs V. The 2nd and 3rd letters are often I not R or L. Reply ONLY 11 chars. If not found: NOTFOUND',
-  'Shipping container OCR. Format: [3 letters][U][6 digit serial][1 check digit] = 11 chars. Common codes: TCNU CSNU TIIU MSCU HLXU TGHU GESU TRHU CAIU FSCU. IMPORTANT: look carefully at each letter - especially 2nd and 3rd characters which are often I (capital i) not R or L. Examine entire image including vertical text. Reply ONLY 11 chars.',
-  'Find ISO 6346 container number in this image. Exactly 4 letters then 7 digits. 4th letter is almost always U. WATCH OUT: the letter I (capital i) looks like 1, l, or r when text is small or at an angle. Verify each character twice. Reply ONLY the 11-character code.',
-  'Character-by-character container number reading. Format: L-L-L-L-D-D-D-D-D-D-D (L=letter, D=digit). Special attention: distinguish I from R, I from L, I from 1, 0 from O, 6 from G, 8 from B. After reading, re-examine each letter position again. Reply ONLY the 11 chars.',
-  'Container identification code: 4 letters + 7 digits. The text may be vertical, small, or faded. Focus especially on getting each LETTER correct - I vs R vs L are commonly confused. Common owner codes starting with T: TCNU TIIU TRIU TGHU TRHU. Reply ONLY the 11-character code.'
+  'You are an expert OCR system for ISO shipping containers. Find the container number: EXACTLY 11 chars = 4 uppercase letters + 7 digits. Example: TIIU6093197. May be horizontal or vertical. CRITICAL: I vs 1, I vs R, I vs L, O vs 0, O vs Q, G vs 6, B vs 8, S vs 5. The 2nd and 3rd letters are often I (capital i) not R or L. Reply ONLY 11 chars. If not found: NOTFOUND',
+  'Shipping container OCR. Format: [3 letters][U][6 digit serial][1 check digit] = 11 chars. Common: TCNU CSNU TIIU MSCU HLXU TGHU GESU TRHU CAIU. IMPORTANT: 2nd/3rd characters are often I not R or L. Reply ONLY 11 chars.',
+  'Find ISO 6346 container number. Exactly 4 letters then 7 digits. 4th letter is almost always U. Watch out: I looks like 1, l, r when small. Re-verify each letter twice. Reply ONLY the 11-character code.',
+  'Read container number character by character. Format: L-L-L-L-D-D-D-D-D-D-D. Distinguish carefully: I vs R, I vs L, I vs 1, 0 vs O, 6 vs G, 8 vs B. Re-examine each letter position. Reply ONLY 11 chars.',
+  'Container code = 4 letters + 7 digits. May be vertical or faded. Focus on getting each LETTER correct - I vs R vs L are the most common errors. Reply ONLY the 11-character code.'
 ];
 
 function scanOnce(b64, prompt, n){
   document.getElementById('scanMsg').textContent='Scanning '+n+' of 5...';
   document.getElementById('progressBar').style.width=((n-1)*14)+'%';
   return fetch(WORKER,{
-    method:'POST',headers:{'content-type':'application/json'},
-    body:JSON.stringify({model:'claude-opus-4-6',max_tokens:20,
+    method:'POST', headers:{'content-type':'application/json'},
+    body:JSON.stringify({model:'claude-opus-4-6', max_tokens:20,
       messages:[{role:'user',content:[
         {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
         {type:'text',text:prompt}
@@ -395,7 +372,7 @@ function scanOnce(b64, prompt, n){
   })
   .then(function(r){return r.json();})
   .then(function(j){
-    if(j.error)throw new Error(j.error.message);
+    if(j.error) throw new Error(j.error.message);
     return ((j.content&&j.content[0]&&j.content[0].text)||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
   });
 }
@@ -405,24 +382,29 @@ function isValidFormat(r){return r&&r!=='NOTFOUND'&&r.length===11&&/^[A-Z]{4}[0-
 function callAPI(b64orig, b64enh, b64inv, imgUrl){
   var results=[];
   var plan=[
-    {b64:b64orig,p:PROMPTS[0]},{b64:b64enh,p:PROMPTS[1]},
-    {b64:b64orig,p:PROMPTS[2]},{b64:b64enh,p:PROMPTS[3]},
-    {b64:b64inv,p:PROMPTS[4]}
+    {b64:b64orig, p:PROMPTS[0]},
+    {b64:b64enh,  p:PROMPTS[1]},
+    {b64:b64orig, p:PROMPTS[2]},
+    {b64:b64enh,  p:PROMPTS[3]},
+    {b64:b64inv,  p:PROMPTS[4]}
   ];
   function run(i){
     if(i>=5){finalize(imgUrl,results,b64enh);return;}
-    scanOnce(plan[i].b64,plan[i].p,i+1)
+    scanOnce(plan[i].b64, plan[i].p, i+1)
     .then(function(r){results.push(r);run(i+1);})
     .catch(function(){results.push('ERR');run(i+1);});
   }
   run(0);
 }
 
-function finalize(imgUrl,results,b64enh){
+function finalize(imgUrl, results, b64enh){
   document.getElementById('scanMsg').textContent='Double-checking...';
   document.getElementById('progressBar').style.width='80%';
   var valid=results.filter(isValidFormat);
-  if(!valid.length){showResult(imgUrl,'','Could not detect. Please type manually.',0,false,false);return;}
+  if(!valid.length){
+    showResult(imgUrl,'','Could not detect. Please type manually.',0,false,false);
+    return;
+  }
   var counts={};
   valid.forEach(function(r){counts[r]=(counts[r]||0)+1;});
   var sorted=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
@@ -431,9 +413,11 @@ function finalize(imgUrl,results,b64enh){
     if(validateContainer(sorted[1])&&!validateContainer(sorted[0])){winner=sorted[1];votes=counts[sorted[1]];}
   }
 
-  // Final double-check
-  var vp='I detected container number: '+winner+'. Verify by checking each character one by one in this image: '
-    +winner.split('').join(' ')+'. If correct reply: CONFIRMED '+winner+'. If wrong reply the correct 11-char code only. If unsure: UNCERTAIN';
+  // Final verification scan
+  var vp='I detected container number: '+winner+'. Check each character one by one in this image: '
+    +winner.split('').join(' - ')+'. Especially verify: is each I really I and not R or L? '
+    +'If correct reply: CONFIRMED '+winner+'. If wrong reply the correct 11-char code only. If unsure: UNCERTAIN';
+
   fetch(WORKER,{method:'POST',headers:{'content-type':'application/json'},
     body:JSON.stringify({model:'claude-opus-4-6',max_tokens:30,
       messages:[{role:'user',content:[
@@ -466,7 +450,7 @@ function validateContainer(num){
   'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l){if(v%11===10)v++;map[l]=v++;});
   var sum=0;
   for(var i=0;i<10;i++){var c=num[i],val=isNaN(c)?map[c]:parseInt(c);if(val===undefined)return false;sum+=val*Math.pow(2,i);}
-  var chk=sum%11;if(chk===10)chk=0;
+  var chk=sum%11; if(chk===10)chk=0;
   return chk===parseInt(num[10]);
 }
 
@@ -494,7 +478,7 @@ function resetAll(){
   document.getElementById('loadingBox').style.display='none';
   document.getElementById('resultBox').style.display='none';
   document.getElementById('numInput').value='';
-  zoomImg=null;
+  origImg=null;
 }
 
 function logRecord(){
