@@ -303,13 +303,36 @@ function bindZoomEvents(){
 }
 
 function scanCropped(){
-  // Crop exactly what's visible on canvas and send to AI
   var canvas=document.getElementById('zoomCanvas');
-  var out=document.createElement('canvas');
-  out.width=canvas.width; out.height=canvas.height;
-  out.getContext('2d').drawImage(canvas,0,0);
-  var croppedUrl=out.toDataURL('image/jpeg',0.95);
-  var b64=croppedUrl.split(',')[1];
+  var cw=canvas.width, ch=canvas.height;
+
+  // Calculate what portion of the ORIGINAL image is visible on canvas
+  // zoomOffX/Y is where the image is drawn on canvas
+  // So visible region of original image:
+  var srcX = -zoomOffX / zoomScale;
+  var srcY = -zoomOffY / zoomScale;
+  var srcW = cw / zoomScale;
+  var srcH = ch / zoomScale;
+
+  // Clamp to image bounds
+  srcX = Math.max(0, srcX);
+  srcY = Math.max(0, srcY);
+  srcW = Math.min(zoomImg.width - srcX, srcW);
+  srcH = Math.min(zoomImg.height - srcY, srcH);
+
+  // Render the cropped area at HIGH resolution (2x for sharpness)
+  var outSize = 1200;
+  var out = document.createElement('canvas');
+  var aspect = srcW / srcH;
+  if(aspect > 1){ out.width=outSize; out.height=Math.round(outSize/aspect); }
+  else { out.height=outSize; out.width=Math.round(outSize*aspect); }
+
+  var ctx = out.getContext('2d');
+  // Draw only the visible/zoomed region from original image at high res
+  ctx.drawImage(zoomImg, srcX, srcY, srcW, srcH, 0, 0, out.width, out.height);
+
+  var croppedUrl = out.toDataURL('image/jpeg', 0.97);
+  var b64 = croppedUrl.split(',')[1];
 
   document.getElementById('zoomSection').style.display='none';
   document.getElementById('loadingBox').style.display='block';
