@@ -76,11 +76,11 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
     <div class="zone-h">Take Container Photo</div>
     <p class="zone-p">Point camera at the container number.<br>AI will read it automatically.</p>
     <div class="btn-row">
-      <button class="btn-cam" onclick="document.getElementById('camInput').click()">&#128247; Camera</button>
-      <button class="btn-gal" onclick="document.getElementById('galInput').click()">&#128444; Gallery</button>
+      <button class="btn-cam" onclick="triggerInput('camInput')">&#128247; Camera</button>
+      <button class="btn-gal" onclick="triggerInput('galInput')">&#128444; Gallery</button>
     </div>
-    <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)">
-    <input type="file" id="galInput" accept="image/*" style="display:none" onchange="handleFile(this)">
+    <input type="file" id="camInput" accept="image/*" capture="environment" style="position:fixed;top:-999px;left:-999px;opacity:0" onchange="handleFile(this)">
+    <input type="file" id="galInput" accept="image/*" style="position:fixed;top:-999px;left:-999px;opacity:0" onchange="handleFile(this)">
   </div>
 
   <div class="loading" id="loadingBox">
@@ -140,6 +140,12 @@ function resizeImage(file, cb) {
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+function triggerInput(id) {
+  var el = document.getElementById(id);
+  el.value = '';
+  el.click();
 }
 
 function handleFile(input) {
