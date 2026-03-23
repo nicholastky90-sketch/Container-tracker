@@ -19,13 +19,14 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 .zone-icon{font-size:52px;margin-bottom:12px;display:block}
 .zone-h{font-family:monospace;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
 .zone-p{font-size:13px;color:#475569;margin-bottom:22px;line-height:1.6}
-/* Single big upload button */
 .btn-upload{display:block;width:100%;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;font-weight:700;font-size:18px;font-family:monospace;text-transform:uppercase;border:none;border-radius:12px;padding:18px;cursor:pointer;letter-spacing:2px;margin-bottom:12px}
 .btn-upload-gal{display:block;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#e2e8f0;font-weight:700;font-size:18px;font-family:monospace;text-transform:uppercase;border-radius:12px;padding:18px;cursor:pointer;letter-spacing:2px}
 .loading{display:none;border:2px dashed rgba(14,165,233,.3);border-radius:14px;padding:24px 14px;text-align:center;background:rgba(14,165,233,.04)}
 .loading img{width:100%;max-height:190px;object-fit:cover;border-radius:10px;margin-bottom:18px}
 .spin-row{display:inline-flex;align-items:center;gap:10px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);border-radius:30px;padding:12px 22px;color:#0ea5e9;font-size:14px;font-weight:600}
 .spinner{width:16px;height:16px;border:2.5px solid rgba(14,165,233,.3);border-top-color:#0ea5e9;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.progress{width:100%;background:rgba(255,255,255,.08);border-radius:99px;height:6px;margin-top:14px;overflow:hidden}
+.progress-bar{height:6px;background:linear-gradient(90deg,#0ea5e9,#38bdf8);border-radius:99px;transition:width .4s ease;width:0%}
 @keyframes spin{to{transform:rotate(360deg)}}
 .result{display:none}
 .prev-img{width:100%;max-height:210px;object-fit:cover;display:block;border-radius:12px 12px 0 0}
@@ -58,8 +59,6 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 </style>
 </head>
 <body>
-
-<!-- Hidden file inputs at top level - most compatible approach -->
 <input id="f1" type="file" accept="image/*" capture="environment" style="position:absolute;left:-9999px;top:-9999px" onchange="handleFile(this)">
 <input id="f2" type="file" accept="image/*" style="position:absolute;left:-9999px;top:-9999px" onchange="handleFile(this)">
 
@@ -68,7 +67,7 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
     <div class="logo">&#128674;</div>
     <div>
       <div class="title">Container Tracker</div>
-      <div class="sub">Photo &rarr; AI reads &rarr; Log</div>
+      <div class="sub">Photo &rarr; AI 5x Scan &rarr; Log</div>
     </div>
     <div class="badge">
       <div class="badge-n" id="totalCount">0</div>
@@ -79,14 +78,15 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
   <div class="zone" id="uploadZone">
     <span class="zone-icon">&#128230;</span>
     <div class="zone-h">Scan Container</div>
-    <p class="zone-p">AI will scan 3 times for maximum accuracy.</p>
-    <button class="btn-upload" id="btnCam" onclick="openCam()">&#128247;&nbsp; OPEN CAMERA</button>
-    <button class="btn-upload-gal" id="btnGal" onclick="openGal()">&#128444;&nbsp; CHOOSE FROM GALLERY</button>
+    <p class="zone-p">AI scans 5 times &amp; cross-checks for maximum accuracy.</p>
+    <button class="btn-upload" onclick="openCam()">&#128247;&nbsp; OPEN CAMERA</button>
+    <button class="btn-upload-gal" onclick="openGal()">&#128444;&nbsp; CHOOSE FROM GALLERY</button>
   </div>
 
   <div class="loading" id="loadingBox">
     <img id="loadingImg" src="" alt="">
-    <div class="spin-row"><div class="spinner"></div><span id="scanMsg">Preparing scan...</span></div>
+    <div class="spin-row"><div class="spinner"></div><span id="scanMsg">Preparing...</span></div>
+    <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
   </div>
 
   <div class="result" id="resultBox">
@@ -118,229 +118,227 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 var WORKER = 'https://noisy-union-8a2e.nicholastky90.workers.dev/';
 var STORE = 'ct_pro';
 var records = [];
-try { records = JSON.parse(localStorage.getItem(STORE) || '[]'); } catch(e) {}
-function saveRecords() { localStorage.setItem(STORE, JSON.stringify(records)); }
-window.onload = function() { renderRecords(); };
+try { records = JSON.parse(localStorage.getItem(STORE)||'[]'); } catch(e){}
+function saveRecords(){ localStorage.setItem(STORE, JSON.stringify(records)); }
+window.onload = function(){ renderRecords(); };
 
-function openCam() {
-  var f = document.getElementById('f1');
-  f.value = '';
-  f.click();
-}
+function openCam(){ var f=document.getElementById('f1'); f.value=''; f.click(); }
+function openGal(){ var f=document.getElementById('f2'); f.value=''; f.click(); }
 
-function openGal() {
-  var f = document.getElementById('f2');
-  f.value = '';
-  f.click();
-}
-
-function handleFile(input) {
-  var file = input.files[0];
-  if (!file) return;
-  resizeImage(file, function(url, b64) {
-    document.getElementById('uploadZone').style.display = 'none';
-    document.getElementById('resultBox').style.display = 'none';
-    document.getElementById('loadingBox').style.display = 'block';
-    document.getElementById('loadingImg').src = url;
+function handleFile(input){
+  var file=input.files[0]; if(!file) return;
+  resizeImage(file, function(url, b64){
+    document.getElementById('uploadZone').style.display='none';
+    document.getElementById('resultBox').style.display='none';
+    document.getElementById('loadingBox').style.display='block';
+    document.getElementById('loadingImg').src=url;
+    document.getElementById('progressBar').style.width='0%';
     callAPI(b64, url);
   });
 }
 
-function resizeImage(file, cb) {
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var img = new Image();
-    img.onload = function() {
-      var MAX = 1280, w = img.width, h = img.height;
-      if (w > MAX || h > MAX) {
-        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
-        else { w = Math.round(w * MAX / h); h = MAX; }
-      }
-      var c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      c.getContext('2d').drawImage(img, 0, 0, w, h);
-      var url = c.toDataURL('image/jpeg', 0.92);
+function resizeImage(file, cb){
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var MAX=1600, w=img.width, h=img.height;
+      if(w>MAX||h>MAX){ if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;} }
+      var c=document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      var url=c.toDataURL('image/jpeg',0.95);
       cb(url, url.split(',')[1]);
     };
-    img.src = e.target.result;
+    img.src=e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-// Auto-correct common misreads
-function fixCommonErrors(raw) {
-  if (!raw || raw.length !== 11) return raw;
-  // Position 0-3 are letters, 4-10 are digits
-  var letters = raw.substring(0, 4);
-  var digits  = raw.substring(4, 11);
-  // In letter zone: fix digit-like chars back to letters
-  letters = letters
-    .replace(/0/g, 'O')
-    .replace(/1/g, 'I')
-    .replace(/8/g, 'B');
-  // In digit zone: fix letter-like chars back to digits
-  digits = digits
-    .replace(/O/g, '0')
-    .replace(/Q/g, '0')
-    .replace(/I/g, '1')
-    .replace(/L/g, '1')
-    .replace(/S/g, '5')
-    .replace(/G/g, '6')
-    .replace(/B/g, '8')
-    .replace(/Z/g, '2');
-  // 4th letter must always be U
-  letters = letters.substring(0,3) + 'U';
-  return letters + digits;
-}
+// 5 different prompts - each focuses on a different aspect
+var PROMPTS = [
+  'You are an expert OCR system for ISO shipping containers. Carefully examine this image for a container number. It is EXACTLY 11 characters: 4 uppercase letters followed by 7 digits. Example: TIIU6093197, TCNU1234567. The number may appear horizontal, vertical, upside-down, or at any angle. Focus on large painted characters. Be extremely careful distinguishing: I vs 1, O vs 0, G vs 6, B vs 8, S vs 5, Z vs 2, Q vs 0. Reply with ONLY the 11 characters. No spaces, no explanation. If not found: NOTFOUND',
 
-function readOnce(b64, prompt, n) {
-  document.getElementById('scanMsg').textContent = 'Scanning ' + n + ' of 3...';
+  'Shipping container OCR task. This image contains a container identification code. The code format is: [OWNER CODE 3 letters][U][6 digit serial][1 check digit]. Total 11 characters. Common owner codes: TCNU CSNU TIIU MSCU HLXU TGHU GESU TRHU CAIU FSCU CMAU OOLU. The number is usually painted large on the door or side panel. It may also appear small and vertical on interior walls. Examine EVERY part of the image systematically. Read left to right or top to bottom if vertical. Reply ONLY the 11 chars.',
+
+  'Look at this shipping container photo very carefully. I need the container registration number which is painted on the container surface. It always follows ISO 6346 format: exactly 4 capital letters then exactly 7 digits. The 4th letter is almost always U. Scan the entire image including edges, walls, doors, panels. The text could be any size or orientation. Once you find it, verify each character one more time before answering. Reply ONLY the raw 11-character code.',
+
+  'Perform careful character-by-character reading of the container number in this image. The number has this exact structure: Letter Letter Letter Letter Digit Digit Digit Digit Digit Digit Digit. Total: 11 characters. After reading, double-check: did you confuse 0 and O? Did you confuse 1 and I? Did you confuse 6 and G? Did you confuse 8 and B? Correct any errors then reply with ONLY the final 11-character answer.',
+
+  'This is a shipping container photo. Your task: find and return the container code. Rules: (1) Must be exactly 11 characters (2) First 4 must be letters A-Z (3) Last 7 must be digits 0-9 (4) 4th letter is usually U. Look at the ENTIRE image including any text that appears sideways or vertical. If you see multiple possible numbers, pick the one that best fits the format. Reply ONLY the 11-character code, nothing else.'
+];
+
+function scanOnce(b64, prompt, n){
+  document.getElementById('scanMsg').textContent = 'Scanning ' + n + ' of 5...';
+  document.getElementById('progressBar').style.width = ((n-1)*18)+'%';
   return fetch(WORKER, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-opus-4-6',
-      max_tokens: 32,
-      messages: [{ role: 'user', content: [
-        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
-        { type: 'text', text: prompt }
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-opus-4-6',
+      max_tokens:20,
+      messages:[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
+        {type:'text',text:prompt}
       ]}]
     })
   })
-  .then(function(r) { return r.json(); })
-  .then(function(j) {
-    if (j.error) throw new Error(j.error.message);
-    return ((j.content && j.content[0] && j.content[0].text) || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
-  })
-  .then(function(raw) { return fixCommonErrors(raw); });
+  .then(function(r){return r.json();})
+  .then(function(j){
+    if(j.error) throw new Error(j.error.message);
+    return ((j.content&&j.content[0]&&j.content[0].text)||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  });
 }
 
-function callAPI(b64, imgUrl) {
-  var p1 = 'Read the ISO container number from this image. CRITICAL character rules: The letter I has NO serifs on containers - it looks like a plain vertical stroke. L is ONLY used in digits area never in owner code. Common owner codes with I: TIIU TRITON ITTU - the I is a straight line. Format: 4 letters + 7 digits. Example: TIIU6093197. Reply ONLY 11 chars. If unsure: NOTFOUND';
-  var p2 = 'Find shipping container number. IMPORTANT: Do NOT confuse these similar characters: (1) I vs L - owner codes use I not L, (2) I vs C - they are completely different, C is curved, I is straight, (3) U is always the 4th letter in owner code. Common codes: TIIU TCNU CSNU MSCU HLXU TGHU. The number TIIU means T-I-I-U where all middle letters are capital I (straight vertical lines). Reply ONLY the 11-character number.';
-  var p3 = 'You are scanning a shipping container door. The owner code is 3 letters + U. WATCH OUT: The letter I (capital i) appears as a single vertical line on containers - do NOT read it as L or C or 1. The letters in TIIU are: T (has horizontal bars), I (straight line), I (straight line), U (curved bottom). Carefully identify each character. Format: 4 letters then 7 digits = 11 total. Reply ONLY the 11 characters.';
+function isValidFormat(r){
+  return r && r!=='NOTFOUND' && r.length===11 && /^[A-Z]{4}[0-9]{7}$/.test(r);
+}
 
-  readOnce(b64, p1, 1)
-  .then(function(r1) {
-    return readOnce(b64, p2, 2).then(function(r2) {
-      return readOnce(b64, p3, 3).then(function(r3) {
-        return [r1, r2, r3];
-      });
+function callAPI(b64, imgUrl){
+  var results=[];
+
+  // Run all 5 scans sequentially
+  function runScan(i){
+    if(i>=5){
+      finalize(imgUrl, results);
+      return;
+    }
+    scanOnce(b64, PROMPTS[i], i+1)
+    .then(function(r){
+      results.push(r);
+      runScan(i+1);
+    })
+    .catch(function(e){
+      results.push('ERROR:'+e.message);
+      runScan(i+1);
     });
-  })
-  .then(function(results) {
-    document.getElementById('scanMsg').textContent = 'Comparing results...';
-    var ok = function(r) { return r && r !== 'NOTFOUND' && /^[A-Z]{4}[0-9]{7}$/.test(r); };
-    var valid = results.filter(ok);
-    var winner = null, conf = 0;
-    if (valid.length) {
-      var counts = {};
-      valid.forEach(function(r) { counts[r] = (counts[r]||0)+1; });
-      Object.keys(counts).forEach(function(k) { if (counts[k] > conf) { winner = k; conf = counts[k]; }});
-    }
-    if (winner) {
-      showResult(imgUrl, winner, '', conf, validateContainer(winner));
-    } else {
-      showResult(imgUrl, '', 'Could not read. Please type manually.', 0, false);
-    }
-  })
-  .catch(function(e) {
-    showResult(imgUrl, '', 'Error: ' + e.message, 0, false);
-  });
-}
-
-function validateContainer(num) {
-  if (!num || num.length !== 11) return false;
-  var map = {}, v = 10;
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l) {
-    if (v % 11 === 10) v++;
-    map[l] = v++;
-  });
-  var sum = 0;
-  for (var i = 0; i < 10; i++) {
-    var c = num[i], val = isNaN(c) ? map[c] : parseInt(c);
-    if (val === undefined) return false;
-    sum += val * Math.pow(2, i);
   }
-  var chk = sum % 11; if (chk === 10) chk = 0;
-  return chk === parseInt(num[10]);
+  runScan(0);
 }
 
-function showResult(imgUrl, detected, err, conf, checkOk) {
-  document.getElementById('loadingBox').style.display = 'none';
-  document.getElementById('resultBox').style.display = 'block';
-  document.getElementById('prevImg').src = imgUrl;
-  document.getElementById('numInput').value = detected;
-  var b = document.getElementById('banner');
-  if (detected) {
-    var perfect = conf === 3 && checkOk;
-    var good = conf >= 2 && checkOk;
-    b.className = (perfect||good) ? 'banner ok' : 'banner warn';
-    var icon = perfect ? '&#9989;&#9989;&#9989;' : good ? '&#9989;&#9989;' : '&#9888;&#65039;';
-    var label = perfect ? '100% Confirmed' : good ? 'High Confidence' : 'Please Verify';
-    var detail = perfect ? 'All 3 scans match + check digit valid'
-               : good    ? conf + '/3 scans agree + check digit valid'
-               :            conf + '/3 scans agree - verify manually';
-    b.innerHTML = icon + ' ' + label + ': <span style="font-family:monospace;letter-spacing:3px;font-size:16px">' + detected + '</span>'
-      + '<br><small style="font-weight:400;font-size:12px">' + detail + '</small>';
+function finalize(imgUrl, results){
+  document.getElementById('scanMsg').textContent = 'Analyzing results...';
+  document.getElementById('progressBar').style.width = '95%';
+
+  var valid = results.filter(isValidFormat);
+
+  if(valid.length === 0){
+    showResult(imgUrl, '', 'Could not detect any container number. Please type manually.', 0, false);
+    return;
+  }
+
+  // Count votes for each candidate
+  var counts={};
+  valid.forEach(function(r){ counts[r]=(counts[r]||0)+1; });
+
+  // Sort by votes
+  var sorted=Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; });
+  var winner=sorted[0];
+  var votes=counts[winner];
+
+  // If top 2 are tied, prefer the one with valid check digit
+  if(sorted.length>1 && counts[sorted[0]]===counts[sorted[1]]){
+    if(validateContainer(sorted[1]) && !validateContainer(sorted[0])){
+      winner=sorted[1]; votes=counts[sorted[1]];
+    }
+  }
+
+  var checkOk=validateContainer(winner);
+  document.getElementById('progressBar').style.width='100%';
+  showResult(imgUrl, winner, '', votes, checkOk);
+}
+
+// ISO 6346 check digit
+function validateContainer(num){
+  if(!num||num.length!==11) return false;
+  var map={}, v=10;
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l){
+    if(v%11===10) v++;
+    map[l]=v++;
+  });
+  var sum=0;
+  for(var i=0;i<10;i++){
+    var c=num[i], val=isNaN(c)?map[c]:parseInt(c);
+    if(val===undefined) return false;
+    sum+=val*Math.pow(2,i);
+  }
+  var chk=sum%11; if(chk===10) chk=0;
+  return chk===parseInt(num[10]);
+}
+
+function showResult(imgUrl, detected, err, votes, checkOk){
+  document.getElementById('loadingBox').style.display='none';
+  document.getElementById('resultBox').style.display='block';
+  document.getElementById('prevImg').src=imgUrl;
+  document.getElementById('numInput').value=detected;
+  var b=document.getElementById('banner');
+  if(detected){
+    var perfect=(votes>=4&&checkOk)||(votes===5);
+    var good=(votes>=3&&checkOk)||(votes>=4);
+    var ok=(votes>=2||checkOk);
+    b.className=perfect?'banner ok':good?'banner ok':ok?'banner warn':'banner warn';
+    var stars=votes>=5?'&#9989;&#9989;&#9989;':votes>=4?'&#9989;&#9989;&#9989;':votes>=3?'&#9989;&#9989;':votes>=2?'&#9989;':'&#9888;&#65039;';
+    var label=perfect?'100% Confirmed':good?'High Confidence':ok?'Likely Correct':'Please Verify';
+    var detail=votes+'/5 scans agree'+(checkOk?' + check digit valid':' (check digit mismatch - verify)');
+    b.innerHTML=stars+' '+label+': <span style="font-family:monospace;letter-spacing:3px;font-size:16px">'+detected+'</span>'
+      +'<br><small style="font-weight:400;font-size:12px">'+detail+'</small>';
   } else {
-    b.className = 'banner err';
-    b.textContent = 'Could not read: ' + err;
+    b.className='banner err';
+    b.textContent=err;
   }
 }
 
-function resetAll() {
-  document.getElementById('uploadZone').style.display = 'block';
-  document.getElementById('loadingBox').style.display = 'none';
-  document.getElementById('resultBox').style.display = 'none';
-  document.getElementById('numInput').value = '';
+function resetAll(){
+  document.getElementById('uploadZone').style.display='block';
+  document.getElementById('loadingBox').style.display='none';
+  document.getElementById('resultBox').style.display='none';
+  document.getElementById('numInput').value='';
 }
 
-function logRecord() {
-  var n = document.getElementById('numInput').value.trim().toUpperCase();
-  if (!n) { showToast('Enter a container number'); return; }
-  var now = new Date();
-  records.unshift({ id: Date.now(), containerNumber: n, date: now.toLocaleDateString('en-GB'), time: now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) });
-  saveRecords(); showToast(n + ' logged!'); resetAll(); renderRecords();
+function logRecord(){
+  var n=document.getElementById('numInput').value.trim().toUpperCase();
+  if(!n){showToast('Enter a container number');return;}
+  var now=new Date();
+  records.unshift({id:Date.now(),containerNumber:n,date:now.toLocaleDateString('en-GB'),time:now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})});
+  saveRecords(); showToast(n+' logged!'); resetAll(); renderRecords();
 }
 
-function delRecord(id) {
-  records = records.filter(function(r) { return r.id !== id; });
+function delRecord(id){
+  records=records.filter(function(r){return r.id!==id;});
   saveRecords(); renderRecords(); showToast('Deleted');
 }
 
-function renderRecords() {
-  document.getElementById('totalCount').textContent = records.length;
-  var el = document.getElementById('recList');
-  if (!records.length) { el.innerHTML = '<div class="empty">No records yet.<br>Take a photo to get started.</div>'; return; }
-  var grouped = {};
-  records.forEach(function(r) { if (!grouped[r.date]) grouped[r.date]=[]; grouped[r.date].push(r); });
-  var html = '';
-  Object.keys(grouped).forEach(function(date) {
-    var recs = grouped[date];
-    html += '<div class="date-lbl"><span>' + date + '</span><span>' + recs.length + ' record' + (recs.length>1?'s':'') + '</span></div>';
-    recs.forEach(function(r,i) {
-      html += '<div class="rec-row"><div class="rec-idx">#'+(i+1)+'</div><div class="rec-num">'+r.containerNumber+'</div><div class="rec-meta">'+r.date+'<br>'+r.time+'</div><button class="btn-del" onclick="delRecord('+r.id+')">&#10005;</button></div>';
+function renderRecords(){
+  document.getElementById('totalCount').textContent=records.length;
+  var el=document.getElementById('recList');
+  if(!records.length){el.innerHTML='<div class="empty">No records yet.<br>Take a photo to get started.</div>';return;}
+  var grouped={};
+  records.forEach(function(r){if(!grouped[r.date])grouped[r.date]=[];grouped[r.date].push(r);});
+  var html='';
+  Object.keys(grouped).forEach(function(date){
+    var recs=grouped[date];
+    html+='<div class="date-lbl"><span>'+date+'</span><span>'+recs.length+' record'+(recs.length>1?'s':'')+'</span></div>';
+    recs.forEach(function(r,i){
+      html+='<div class="rec-row"><div class="rec-idx">#'+(i+1)+'</div><div class="rec-num">'+r.containerNumber+'</div><div class="rec-meta">'+r.date+'<br>'+r.time+'</div><button class="btn-del" onclick="delRecord('+r.id+')">&#10005;</button></div>';
     });
   });
-  el.innerHTML = html;
+  el.innerHTML=html;
 }
 
-function exportCSV() {
-  if (!records.length) { showToast('No records yet'); return; }
-  var rows = [['No.','Container Number','Date','Time']];
-  records.forEach(function(r,i) { rows.push([i+1,r.containerNumber,r.date,r.time]); });
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([rows.map(function(r){return r.join(',');}).join('\n')],{type:'text/csv'}));
-  a.download = 'containers-'+new Date().toLocaleDateString('en-GB').replace(/\//g,'-')+'.csv';
+function exportCSV(){
+  if(!records.length){showToast('No records yet');return;}
+  var rows=[['No.','Container Number','Date','Time']];
+  records.forEach(function(r,i){rows.push([i+1,r.containerNumber,r.date,r.time]);});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([rows.map(function(r){return r.join(',');}).join('\n')],{type:'text/csv'}));
+  a.download='containers-'+new Date().toLocaleDateString('en-GB').replace(/\//g,'-')+'.csv';
   a.click(); showToast('CSV downloaded!');
 }
 
 var tt;
-function showToast(msg) {
-  var t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  clearTimeout(tt); tt = setTimeout(function(){t.classList.remove('show');}, 2500);
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(tt); tt=setTimeout(function(){t.classList.remove('show');},2500);
 }
 </script>
 </body>
