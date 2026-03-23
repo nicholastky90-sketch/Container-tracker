@@ -165,7 +165,7 @@ function callAPI(b64, imgUrl) {
         role: 'user',
         content: [
           { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
-          { type: 'text', text: 'Find the ISO shipping container number in this image. It is painted in large characters on the container. Format: 4 capital letters then 7 digits e.g. CSNU2163239. Reply ONLY the number, no spaces. If not found reply: NOTFOUND' }
+          { type: 'text', text: 'Look carefully at this image for an ISO shipping container number. It may be printed horizontally or vertically, on the outside or inside wall. The format is exactly 4 capital letters followed by 7 digits (example: TCNU6063917, CSNU2163239). Look at every angle and wall in the image. Reply ONLY with the container number, no spaces, no extra text. If you cannot find it clearly, reply: NOTFOUND' }
         ]
       }]
     })
