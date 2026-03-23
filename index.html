@@ -15,38 +15,45 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 .badge{margin-left:auto;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.2);border-radius:10px;padding:6px 13px;text-align:center;flex-shrink:0}
 .badge-n{font-family:monospace;font-size:24px;font-weight:700;color:#0ea5e9;line-height:1}
 .badge-l{font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:1px}
-.zone{border:2px dashed rgba(255,255,255,.1);border-radius:14px;padding:30px 14px;text-align:center;background:rgba(255,255,255,.02)}
-.zone-icon{font-size:52px;margin-bottom:12px;display:block}
-.zone-h{font-family:monospace;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
-.zone-p{font-size:13px;color:#475569;margin-bottom:22px;line-height:1.6}
-.btn-upload{display:block;width:100%;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;font-weight:700;font-size:18px;font-family:monospace;text-transform:uppercase;border:none;border-radius:12px;padding:18px;cursor:pointer;letter-spacing:2px;margin-bottom:12px}
-.btn-upload-gal{display:block;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#e2e8f0;font-weight:700;font-size:18px;font-family:monospace;text-transform:uppercase;border-radius:12px;padding:18px;cursor:pointer;letter-spacing:2px}
 
-/* ZOOM EDITOR */
-#zoomSection{display:none}
-.zoom-label{font-family:monospace;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#0ea5e9;margin-bottom:8px;text-align:center}
-.zoom-wrap{position:relative;width:100%;background:#000;border-radius:12px;overflow:hidden;border:2px solid rgba(14,165,233,.4);touch-action:none;user-select:none}
-#zoomCanvas{display:block;width:100%;height:300px;cursor:grab}
-#zoomCanvas:active{cursor:grabbing}
-/* Red selection box drawn on canvas */
-.zoom-btns{display:flex;gap:8px;margin-top:8px}
-.zbtn{flex:1;border-radius:8px;padding:12px;font-size:18px;font-weight:700;cursor:pointer;border:none}
-.zbtn-plus{background:rgba(14,165,233,.2);border:1px solid rgba(14,165,233,.4)!important;color:#0ea5e9}
-.zbtn-minus{background:rgba(14,165,233,.2);border:1px solid rgba(14,165,233,.4)!important;color:#0ea5e9}
-.zbtn-reset{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1)!important;color:#64748b;font-size:11px;font-family:monospace;text-transform:uppercase;letter-spacing:1px}
-.zoom-info{text-align:center;font-size:11px;color:#475569;margin-top:6px;font-family:monospace}
-.btn-scan-now{display:block;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-weight:700;font-size:17px;font-family:monospace;text-transform:uppercase;border:none;border-radius:12px;padding:16px;cursor:pointer;letter-spacing:2px;margin-top:10px}
-.btn-zoom-cancel{display:block;width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#475569;font-family:monospace;font-size:13px;font-weight:700;text-transform:uppercase;border-radius:10px;padding:12px;cursor:pointer;margin-top:8px}
+/* TABS */
+.tabs{display:flex;gap:6px;margin-bottom:18px}
+.tab{flex:1;padding:11px 6px;border-radius:10px;font-family:monospace;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;border:none;cursor:pointer;transition:all .2s}
+.tab.active{background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff}
+.tab.inactive{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#475569}
 
+/* UPLOAD ZONE */
+.zone{border:2px dashed rgba(255,255,255,.1);border-radius:14px;padding:24px 14px;text-align:center;background:rgba(255,255,255,.02)}
+.zone-icon{font-size:44px;margin-bottom:10px;display:block}
+.zone-h{font-family:monospace;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.zone-p{font-size:12px;color:#475569;margin-bottom:18px;line-height:1.6}
+.btn-upload{display:block;width:100%;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;font-weight:700;font-size:16px;font-family:monospace;text-transform:uppercase;border:none;border-radius:12px;padding:16px;cursor:pointer;letter-spacing:2px;margin-bottom:10px}
+.btn-upload-gal{display:block;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#e2e8f0;font-weight:700;font-size:16px;font-family:monospace;text-transform:uppercase;border-radius:12px;padding:16px;cursor:pointer;letter-spacing:2px}
+
+/* ZOOM */
+.zoom-box{display:none;border:2px solid rgba(14,165,233,.4);border-radius:14px;overflow:hidden;background:#000;margin-bottom:12px;position:relative}
+.zoom-hint{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#fff;font-size:11px;padding:5px 12px;border-radius:20px;white-space:nowrap;pointer-events:none;z-index:10;font-family:monospace;transition:opacity .5s}
+.zoom-canvas{display:block;width:100%;touch-action:none;cursor:grab}
+.zoom-canvas:active{cursor:grabbing}
+.zoom-controls{display:flex;gap:8px;padding:10px;background:rgba(0,0,0,.4)}
+.btn-zi{flex:1;background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);color:#0ea5e9;font-size:20px;font-weight:700;border-radius:8px;padding:10px;cursor:pointer}
+.btn-zo{flex:1;background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);color:#0ea5e9;font-size:20px;font-weight:700;border-radius:8px;padding:10px;cursor:pointer}
+.btn-zr{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#94a3b8;font-size:11px;font-weight:700;border-radius:8px;padding:10px;cursor:pointer;font-family:monospace;text-transform:uppercase}
+.btn-scan-now{display:block;width:100%;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-weight:700;font-size:16px;font-family:monospace;text-transform:uppercase;border:none;border-radius:12px;padding:15px;cursor:pointer;letter-spacing:2px;margin-top:10px}
+.btn-cancel{display:block;width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#475569;font-family:monospace;font-size:12px;font-weight:700;text-transform:uppercase;border-radius:10px;padding:12px;cursor:pointer;margin-top:8px}
+
+/* LOADING */
 .loading{display:none;border:2px dashed rgba(14,165,233,.3);border-radius:14px;padding:24px 14px;text-align:center;background:rgba(14,165,233,.04)}
-.loading img{width:100%;max-height:220px;object-fit:contain;border-radius:10px;margin-bottom:18px;background:#000}
+.loading img{width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin-bottom:16px}
 .spin-row{display:inline-flex;align-items:center;gap:10px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);border-radius:30px;padding:12px 22px;color:#0ea5e9;font-size:14px;font-weight:600}
 .spinner{width:16px;height:16px;border:2.5px solid rgba(14,165,233,.3);border-top-color:#0ea5e9;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 .progress{width:100%;background:rgba(255,255,255,.08);border-radius:99px;height:6px;margin-top:14px;overflow:hidden}
 .progress-bar{height:6px;background:linear-gradient(90deg,#0ea5e9,#38bdf8);border-radius:99px;transition:width .4s ease;width:0%}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* SINGLE RESULT */
 .result{display:none}
-.prev-img{width:100%;max-height:220px;object-fit:contain;display:block;border-radius:12px 12px 0 0;background:#000}
+.prev-img{width:100%;max-height:200px;object-fit:cover;display:block;border-radius:12px 12px 0 0}
 .prev-bar{display:flex;justify-content:flex-end;padding:8px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-top:none;border-radius:0 0 12px 12px;margin-bottom:12px}
 .btn-clr{background:none;border:1px solid rgba(255,255,255,.1);color:#475569;border-radius:6px;padding:4px 14px;font-size:12px;cursor:pointer}
 .banner{padding:12px 14px;border-radius:10px;font-size:14px;margin-bottom:12px;font-weight:600;line-height:1.6}
@@ -58,16 +65,36 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 #numInput{font-family:monospace;font-size:28px;font-weight:700;letter-spacing:4px;color:#facc15;background:rgba(250,204,21,.06);border:1px solid rgba(250,204,21,.3);border-radius:8px;padding:11px 14px;width:100%;text-transform:uppercase}
 #numInput:focus{outline:none;border-color:#facc15}
 .act-row{display:flex;gap:10px}
-.btn-retake{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#475569;font-family:monospace;font-size:13px;font-weight:700;text-transform:uppercase;border-radius:10px;padding:13px;cursor:pointer}
-.btn-log{flex:2;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-family:monospace;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:1px;border:none;border-radius:10px;padding:13px;cursor:pointer}
+.btn-retake{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#475569;font-family:monospace;font-size:12px;font-weight:700;text-transform:uppercase;border-radius:10px;padding:12px;cursor:pointer}
+.btn-log{flex:2;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-family:monospace;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:1px;border:none;border-radius:10px;padding:12px;cursor:pointer}
+
+/* BOL RESULT */
+.bol-result{display:none}
+.bol-preview{width:100%;max-height:180px;object-fit:cover;display:block;border-radius:12px 12px 0 0}
+.bol-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-top:none;border-radius:0 0 12px 12px;margin-bottom:12px}
+.bol-found{font-size:12px;color:#4ade80;font-family:monospace;font-weight:700}
+.bol-list{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;margin-bottom:12px}
+.bol-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.05)}
+.bol-row:last-child{border-bottom:none}
+.bol-num{font-family:monospace;font-size:16px;color:#facc15;font-weight:700;letter-spacing:2px;flex:1}
+.bol-chk{font-size:16px}
+.bol-edit{font-family:monospace;font-size:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#e2e8f0;border-radius:6px;padding:5px 8px;width:100%;text-transform:uppercase}
+.bol-edit:focus{outline:none;border-color:#facc15}
+.bol-actions{display:flex;gap:10px}
+.btn-bol-log{flex:2;background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;font-family:monospace;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:1px;border:none;border-radius:10px;padding:13px;cursor:pointer}
+.btn-bol-exp{flex:1;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.3);color:#0ea5e9;font-family:monospace;font-size:12px;font-weight:700;text-transform:uppercase;border-radius:10px;padding:13px;cursor:pointer}
+.btn-bol-cancel{display:block;width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#475569;font-family:monospace;font-size:12px;font-weight:700;text-transform:uppercase;border-radius:10px;padding:12px;cursor:pointer;margin-top:8px}
+
+/* RECORDS */
 .rec-sec{margin-top:28px}
 .rec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .rec-title{font-family:monospace;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#475569}
 .btn-exp{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:#e2e8f0;font-family:monospace;font-size:11px;font-weight:700;text-transform:uppercase;border-radius:8px;padding:7px 13px;cursor:pointer}
 .date-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#334155;padding:6px 4px;display:flex;justify-content:space-between}
-.rec-row{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.rec-row{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:11px;display:flex;align-items:center;gap:10px;margin-bottom:6px}
 .rec-idx{font-size:11px;color:#334155;min-width:22px;font-family:monospace}
-.rec-num{font-family:monospace;font-size:17px;color:#facc15;flex:1;letter-spacing:3px;font-weight:700}
+.rec-num{font-family:monospace;font-size:16px;color:#facc15;flex:1;letter-spacing:2px;font-weight:700}
+.rec-src{font-size:9px;color:#0ea5e9;font-family:monospace;background:rgba(14,165,233,.1);border-radius:4px;padding:2px 6px}
 .rec-meta{font-size:10px;color:#475569;text-align:right;line-height:1.6}
 .btn-del{background:none;border:none;color:#334155;font-size:15px;cursor:pointer;padding:2px 5px;line-height:1}
 .empty{text-align:center;padding:28px 14px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.07);border-radius:12px;color:#334155;font-size:13px;line-height:1.8}
@@ -76,15 +103,17 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 </style>
 </head>
 <body>
-<input id="f1" type="file" accept="image/*" capture="environment" style="position:absolute;left:-9999px;top:-9999px" onchange="handleFile(this)">
-<input id="f2" type="file" accept="image/*" style="position:absolute;left:-9999px;top:-9999px" onchange="handleFile(this)">
+<input id="f1" type="file" accept="image/*" capture="environment" style="position:absolute;left:-9999px;top:-9999px" onchange="handleSingle(this)">
+<input id="f2" type="file" accept="image/*" style="position:absolute;left:-9999px;top:-9999px" onchange="handleSingle(this)">
+<input id="f3" type="file" accept="image/*" capture="environment" style="position:absolute;left:-9999px;top:-9999px" onchange="handleBOL(this)">
+<input id="f4" type="file" accept="image/*" style="position:absolute;left:-9999px;top:-9999px" onchange="handleBOL(this)">
 
 <div class="wrap">
   <div class="hdr">
     <div class="logo">&#128674;</div>
     <div>
       <div class="title">Container Tracker</div>
-      <div class="sub">Zoom &rarr; Lock &rarr; AI Scan &rarr; Log</div>
+      <div class="sub">Single Scan &bull; BOL Multi-Scan</div>
     </div>
     <div class="badge">
       <div class="badge-n" id="totalCount">0</div>
@@ -92,51 +121,90 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
     </div>
   </div>
 
-  <div class="zone" id="uploadZone">
-    <span class="zone-icon">&#128230;</span>
-    <div class="zone-h">Scan Container</div>
-    <p class="zone-p">Zoom into the container number, lock the area, then scan for maximum accuracy.</p>
-    <button class="btn-upload" onclick="openCam()">&#128247;&nbsp; OPEN CAMERA</button>
-    <button class="btn-upload-gal" onclick="openGal()">&#128444;&nbsp; CHOOSE FROM GALLERY</button>
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" id="tab1" onclick="switchTab('single')">&#128247; Single Scan</button>
+    <button class="tab inactive" id="tab2" onclick="switchTab('bol')">&#128196; BOL Scanner</button>
   </div>
 
-  <!-- Zoom Editor -->
-  <div id="zoomSection">
-    <div class="zoom-label">&#128269; Zoom &amp; Pan to the container number</div>
-    <div class="zoom-wrap" id="zoomWrap">
-      <canvas id="zoomCanvas"></canvas>
+  <!-- ===== SINGLE SCAN TAB ===== -->
+  <div id="singleTab">
+    <div class="zone" id="uploadZone">
+      <span class="zone-icon">&#128230;</span>
+      <div class="zone-h">Scan Container</div>
+      <p class="zone-p">Take or upload a photo, zoom into the number, then scan.</p>
+      <button class="btn-upload" onclick="openCam()">&#128247;&nbsp; OPEN CAMERA</button>
+      <button class="btn-upload-gal" onclick="openGal()">&#128444;&nbsp; CHOOSE FROM GALLERY</button>
     </div>
-    <div class="zoom-btns">
-      <button class="zbtn zbtn-plus" onclick="doZoom(1.4)">+</button>
-      <button class="zbtn zbtn-minus" onclick="doZoom(0.71)">&#8722;</button>
-      <button class="zbtn zbtn-reset" onclick="zoomReset()">Reset</button>
+
+    <div id="zoomSection" style="display:none">
+      <div class="zoom-box" id="zoomBox">
+        <div class="zoom-hint" id="zoomHint">&#128269; Pinch or use +/- to zoom &bull; Drag to pan</div>
+        <canvas id="zoomCanvas" class="zoom-canvas" height="300"></canvas>
+        <div class="zoom-controls">
+          <button class="btn-zi" onclick="zoomIn()">+</button>
+          <button class="btn-zo" onclick="zoomOut()">&#8722;</button>
+          <button class="btn-zr" onclick="zoomReset()">Reset</button>
+        </div>
+      </div>
+      <button class="btn-scan-now" onclick="scanCropped()">&#128269; SCAN THIS AREA</button>
+      <button class="btn-cancel" onclick="resetAll()">&#8617; Cancel</button>
     </div>
-    <div class="zoom-info" id="zoomInfo">Zoom: 1.0x</div>
-    <button class="btn-scan-now" onclick="scanCropped()">&#128247; LOCK &amp; SCAN THIS AREA</button>
-    <button class="btn-zoom-cancel" onclick="resetAll()">&#8617; Cancel</button>
+
+    <div class="loading" id="loadingBox">
+      <img id="loadingImg" src="" alt="">
+      <div class="spin-row"><div class="spinner"></div><span id="scanMsg">Preparing...</span></div>
+      <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+
+    <div class="result" id="resultBox">
+      <img class="prev-img" id="prevImg" src="" alt="">
+      <div class="prev-bar"><button class="btn-clr" onclick="resetAll()">&#10005; Clear</button></div>
+      <div class="banner" id="banner"></div>
+      <div class="num-box">
+        <div class="num-lbl">Container Number &mdash; edit if needed</div>
+        <input type="text" id="numInput" placeholder="TIIU6093197" maxlength="11"
+               oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+      </div>
+      <div class="act-row">
+        <button class="btn-retake" onclick="resetAll()">&#8617; Retake</button>
+        <button class="btn-log" onclick="logRecord('single')">&#9989; Log Record</button>
+      </div>
+    </div>
   </div>
 
-  <div class="loading" id="loadingBox">
-    <img id="loadingImg" src="" alt="">
-    <div class="spin-row"><div class="spinner"></div><span id="scanMsg">Preparing...</span></div>
-    <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+  <!-- ===== BOL SCANNER TAB ===== -->
+  <div id="bolTab" style="display:none">
+    <div class="zone" id="bolUploadZone">
+      <span class="zone-icon">&#128196;</span>
+      <div class="zone-h">Bill of Lading Scanner</div>
+      <p class="zone-p">Upload or photograph a Bill of Lading.<br>AI will extract ALL container numbers at once.</p>
+      <button class="btn-upload" onclick="openBolCam()">&#128247;&nbsp; PHOTOGRAPH BOL</button>
+      <button class="btn-upload-gal" onclick="openBolGal()">&#128444;&nbsp; UPLOAD BOL IMAGE</button>
+    </div>
+
+    <div class="loading" id="bolLoadingBox" style="display:none">
+      <img id="bolLoadingImg" src="" alt="">
+      <div class="spin-row"><div class="spinner"></div><span id="bolScanMsg">Reading BOL...</span></div>
+      <div class="progress"><div class="progress-bar" id="bolProgressBar"></div></div>
+    </div>
+
+    <div class="bol-result" id="bolResultBox">
+      <img class="bol-preview" id="bolPrevImg" src="" alt="">
+      <div class="bol-bar">
+        <span class="bol-found" id="bolFoundLabel">0 containers found</span>
+        <button class="btn-clr" onclick="resetBOL()">&#10005; Clear</button>
+      </div>
+      <div class="bol-list" id="bolList"></div>
+      <div class="bol-actions">
+        <button class="btn-bol-log" onclick="logAllBOL()">&#9989; Log All</button>
+        <button class="btn-bol-exp" onclick="exportBOLCSV()">&#8681; CSV</button>
+      </div>
+      <button class="btn-bol-cancel" onclick="resetBOL()">&#8617; Scan Another BOL</button>
+    </div>
   </div>
 
-  <div class="result" id="resultBox">
-    <img class="prev-img" id="prevImg" src="" alt="">
-    <div class="prev-bar"><button class="btn-clr" onclick="resetAll()">&#10005; Clear</button></div>
-    <div class="banner" id="banner"></div>
-    <div class="num-box">
-      <div class="num-lbl">Container Number &mdash; edit if needed</div>
-      <input type="text" id="numInput" placeholder="TIIU6093197" maxlength="11"
-             oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
-    </div>
-    <div class="act-row">
-      <button class="btn-retake" onclick="resetAll()">&#8617; Retake</button>
-      <button class="btn-log" onclick="logRecord()">&#9989; Log Record</button>
-    </div>
-  </div>
-
+  <!-- RECORDS -->
   <div class="rec-sec">
     <div class="rec-hdr">
       <div class="rec-title">&#128203; Records</div>
@@ -155,303 +223,204 @@ try{records=JSON.parse(localStorage.getItem(STORE)||'[]');}catch(e){}
 function saveRecords(){localStorage.setItem(STORE,JSON.stringify(records));}
 window.onload=function(){renderRecords();};
 
+// ---- TABS ----
+function switchTab(t){
+  document.getElementById('singleTab').style.display=t==='single'?'block':'none';
+  document.getElementById('bolTab').style.display=t==='bol'?'block':'none';
+  document.getElementById('tab1').className='tab '+(t==='single'?'active':'inactive');
+  document.getElementById('tab2').className='tab '+(t==='bol'?'active':'inactive');
+}
+
+// ---- FILE INPUTS ----
 function openCam(){var f=document.getElementById('f1');f.value='';f.click();}
 function openGal(){var f=document.getElementById('f2');f.value='';f.click();}
+function openBolCam(){var f=document.getElementById('f3');f.value='';f.click();}
+function openBolGal(){var f=document.getElementById('f4');f.value='';f.click();}
 
-// ========== ZOOM ENGINE ==========
-var origImg = null;   // original Image object (full resolution)
-var vx=0, vy=0;      // top-left corner of visible region in ORIGINAL image coords
-var vw=0, vh=0;      // size of visible region in ORIGINAL image coords
-var canvasW=0, canvasH=300;
-var isDrag=false, dragStartX=0, dragStartY=0, dragVX=0, dragVY=0;
-var pinchStartDist=0, pinchStartVW=0, pinchStartVH=0, pinchStartVX=0, pinchStartVY=0;
+// ---- ZOOM STATE ----
+var zoomImg=null,zoomScale=1,zoomMinScale=1,zoomMaxScale=8;
+var zoomOffX=0,zoomOffY=0,isDragging=false,lastX=0,lastY=0;
+var pinchStartDist=0,pinchStartScale=1;
 
-function handleFile(input){
+function handleSingle(input){
   var file=input.files[0]; if(!file) return;
   var reader=new FileReader();
   reader.onload=function(e){
     var img=new Image();
     img.onload=function(){
-      origImg=img;
+      zoomImg=img;
       document.getElementById('uploadZone').style.display='none';
       document.getElementById('zoomSection').style.display='block';
-      setupCanvas();
+      document.getElementById('zoomBox').style.display='block';
+      initZoomCanvas();
+      setTimeout(function(){document.getElementById('zoomHint').style.opacity='0';},3000);
     };
     img.src=e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-function setupCanvas(){
-  var wrap=document.getElementById('zoomWrap');
-  canvasW=wrap.clientWidth||360;
-  canvasH=300;
-  var c=document.getElementById('zoomCanvas');
-  c.width=canvasW; c.height=canvasH;
-  c.style.width=canvasW+'px'; c.style.height=canvasH+'px';
-  zoomReset();
-  bindEvents(c);
+function initZoomCanvas(){
+  var canvas=document.getElementById('zoomCanvas');
+  canvas.width=canvas.parentElement.clientWidth||360;
+  canvas.height=300;
+  zoomScale=zoomMinScale=Math.min(canvas.width/zoomImg.width,canvas.height/zoomImg.height);
+  zoomOffX=(canvas.width-zoomImg.width*zoomScale)/2;
+  zoomOffY=(canvas.height-zoomImg.height*zoomScale)/2;
+  drawZoom(); bindZoomEvents();
 }
 
+function drawZoom(){
+  var canvas=document.getElementById('zoomCanvas'),ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(zoomImg,zoomOffX,zoomOffY,zoomImg.width*zoomScale,zoomImg.height*zoomScale);
+  ctx.strokeStyle='rgba(14,165,233,0.25)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  ctx.strokeRect(canvas.width*.08,canvas.height*.08,canvas.width*.84,canvas.height*.84);
+  ctx.setLineDash([]);
+}
+
+function clampOffset(){
+  var c=document.getElementById('zoomCanvas');
+  var iw=zoomImg.width*zoomScale,ih=zoomImg.height*zoomScale;
+  zoomOffX=Math.max(c.width*.1-iw,Math.min(c.width*.9,zoomOffX));
+  zoomOffY=Math.max(c.height*.1-ih,Math.min(c.height*.9,zoomOffY));
+}
+
+function zoomIn(){
+  var c=document.getElementById('zoomCanvas'),cx=c.width/2,cy=c.height/2,prev=zoomScale;
+  zoomScale=Math.min(zoomMaxScale,zoomScale*1.4);
+  zoomOffX=cx-(cx-zoomOffX)*(zoomScale/prev); zoomOffY=cy-(cy-zoomOffY)*(zoomScale/prev);
+  clampOffset(); drawZoom();
+}
+function zoomOut(){
+  var c=document.getElementById('zoomCanvas'),cx=c.width/2,cy=c.height/2,prev=zoomScale;
+  zoomScale=Math.max(zoomMinScale,zoomScale/1.4);
+  zoomOffX=cx-(cx-zoomOffX)*(zoomScale/prev); zoomOffY=cy-(cy-zoomOffY)*(zoomScale/prev);
+  clampOffset(); drawZoom();
+}
 function zoomReset(){
-  // Fit entire image into canvas
-  var imgAspect=origImg.width/origImg.height;
-  var canAspect=canvasW/canvasH;
-  if(imgAspect>canAspect){ vw=origImg.width; vh=Math.round(origImg.width/canAspect); }
-  else { vh=origImg.height; vw=Math.round(origImg.height*canAspect); }
-  vx=Math.round((origImg.width-vw)/2);
-  vy=Math.round((origImg.height-vh)/2);
-  clamp(); draw();
-}
-
-function doZoom(factor){
-  // Zoom toward center of visible region
-  var cx=vx+vw/2, cy=vy+vh/2;
-  var minVW=Math.round(canvasW/8); // max zoom = 8x
-  var maxVW=origImg.width*2;       // min zoom = fit
-  var newVW=Math.max(minVW, Math.min(maxVW, Math.round(vw*factor)));
-  var newVH=Math.round(newVW*(canvasH/canvasW));
-  vx=Math.round(cx-newVW/2); vy=Math.round(cy-newVH/2);
-  vw=newVW; vh=newVH;
-  clamp(); draw();
-}
-
-function clamp(){
-  // Keep view within image bounds (allow slight overflow for small images)
-  vx=Math.max(-Math.round(vw*0.1), Math.min(origImg.width-Math.round(vw*0.9), vx));
-  vy=Math.max(-Math.round(vh*0.1), Math.min(origImg.height-Math.round(vh*0.9), vy));
-}
-
-function draw(){
   var c=document.getElementById('zoomCanvas');
-  var ctx=c.getContext('2d');
-  ctx.clearRect(0,0,canvasW,canvasH);
-  ctx.fillStyle='#111'; ctx.fillRect(0,0,canvasW,canvasH);
-  // Draw the visible region of original image onto full canvas
-  ctx.drawImage(origImg, vx, vy, vw, vh, 0, 0, canvasW, canvasH);
-  // Overlay: show current zoom level
-  var zoom=(origImg.width/vw).toFixed(1);
-  document.getElementById('zoomInfo').textContent='Zoom: '+zoom+'x — visible area locked for scan';
-  // Draw border highlight
-  ctx.strokeStyle='rgba(14,165,233,0.6)'; ctx.lineWidth=3;
-  ctx.strokeRect(2,2,canvasW-4,canvasH-4);
+  zoomScale=zoomMinScale;
+  zoomOffX=(c.width-zoomImg.width*zoomScale)/2; zoomOffY=(c.height-zoomImg.height*zoomScale)/2;
+  drawZoom();
 }
 
-function bindEvents(c){
-  // Mouse drag
-  c.onmousedown=function(e){
-    isDrag=true;
-    dragStartX=e.clientX; dragStartY=e.clientY;
-    dragVX=vx; dragVY=vy;
-  };
-  c.onmousemove=function(e){
-    if(!isDrag) return;
-    var dx=e.clientX-dragStartX, dy=e.clientY-dragStartY;
-    // Convert screen pixels to image pixels
-    vx=dragVX - Math.round(dx*(vw/canvasW));
-    vy=dragVY - Math.round(dy*(vh/canvasH));
-    clamp(); draw();
-  };
-  c.onmouseup=c.onmouseleave=function(){isDrag=false;};
-
-  // Touch drag + pinch
+function bindZoomEvents(){
+  var c=document.getElementById('zoomCanvas');
+  c.onmousedown=function(e){isDragging=true;lastX=e.clientX;lastY=e.clientY;};
+  c.onmousemove=function(e){if(!isDragging)return;zoomOffX+=e.clientX-lastX;zoomOffY+=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;clampOffset();drawZoom();};
+  c.onmouseup=c.onmouseleave=function(){isDragging=false;};
   c.ontouchstart=function(e){
     e.preventDefault();
-    if(e.touches.length===1){
-      isDrag=true;
-      dragStartX=e.touches[0].clientX; dragStartY=e.touches[0].clientY;
-      dragVX=vx; dragVY=vy;
-    } else if(e.touches.length===2){
-      isDrag=false;
-      pinchStartDist=Math.hypot(
-        e.touches[1].clientX-e.touches[0].clientX,
-        e.touches[1].clientY-e.touches[0].clientY);
-      pinchStartVW=vw; pinchStartVH=vh;
-      pinchStartVX=vx; pinchStartVY=vy;
-    }
+    if(e.touches.length===1){isDragging=true;lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;}
+    else if(e.touches.length===2){isDragging=false;pinchStartDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);pinchStartScale=zoomScale;}
   };
   c.ontouchmove=function(e){
     e.preventDefault();
-    if(e.touches.length===1&&isDrag){
-      var dx=e.touches[0].clientX-dragStartX, dy=e.touches[0].clientY-dragStartY;
-      vx=dragVX - Math.round(dx*(vw/canvasW));
-      vy=dragVY - Math.round(dy*(vh/canvasH));
-      clamp(); draw();
-    } else if(e.touches.length===2){
-      var dist=Math.hypot(
-        e.touches[1].clientX-e.touches[0].clientX,
-        e.touches[1].clientY-e.touches[0].clientY);
-      var ratio=pinchStartDist/dist; // >1 = zoom in (smaller region), <1 = zoom out
-      var minVW=Math.round(canvasW/8);
-      var maxVW=origImg.width*2;
-      var newVW=Math.max(minVW,Math.min(maxVW,Math.round(pinchStartVW*ratio)));
-      var newVH=Math.round(newVW*(canvasH/canvasW));
-      // Zoom toward pinch center
-      var pcx=((e.touches[0].clientX+e.touches[1].clientX)/2);
-      var pcy=((e.touches[0].clientY+e.touches[1].clientY)/2);
-      var rect=c.getBoundingClientRect();
-      var cx=pinchStartVX+((pcx-rect.left)/canvasW)*pinchStartVW;
-      var cy=pinchStartVY+((pcy-rect.top)/canvasH)*pinchStartVH;
-      vx=Math.round(cx-newVW/2); vy=Math.round(cy-newVH/2);
-      vw=newVW; vh=newVH;
-      clamp(); draw();
+    if(e.touches.length===1&&isDragging){zoomOffX+=e.touches[0].clientX-lastX;zoomOffY+=e.touches[0].clientY-lastY;lastX=e.touches[0].clientX;lastY=e.touches[0].clientY;clampOffset();drawZoom();}
+    else if(e.touches.length===2){
+      var d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      var ns=Math.max(zoomMinScale,Math.min(zoomMaxScale,pinchStartScale*(d/pinchStartDist)));
+      var r=c.getBoundingClientRect();
+      var cx=(e.touches[0].clientX+e.touches[1].clientX)/2-r.left;
+      var cy=(e.touches[0].clientY+e.touches[1].clientY)/2-r.top;
+      zoomOffX=cx-(cx-zoomOffX)*(ns/zoomScale); zoomOffY=cy-(cy-zoomOffY)*(ns/zoomScale);
+      zoomScale=ns; clampOffset(); drawZoom();
     }
   };
-  c.ontouchend=function(e){if(e.touches.length===0)isDrag=false;};
+  c.ontouchend=function(){isDragging=false;};
 }
 
 function scanCropped(){
-  // Crop EXACTLY the locked region from original image at high resolution
-  var outW=1400, outH=Math.round(1400*(vh/vw));
-  var cropCanvas=document.createElement('canvas');
-  cropCanvas.width=outW; cropCanvas.height=outH;
-  var ctx=cropCanvas.getContext('2d');
-  // Draw only the locked region (vx,vy,vw,vh) from original image
-  ctx.drawImage(origImg, vx, vy, vw, vh, 0, 0, outW, outH);
-
-  var croppedUrl=cropCanvas.toDataURL('image/jpeg',0.97);
-  var b64=croppedUrl.split(',')[1];
-
+  var canvas=document.getElementById('zoomCanvas');
+  var cw=canvas.width,ch=canvas.height;
+  var srcX=-zoomOffX/zoomScale, srcY=-zoomOffY/zoomScale;
+  var srcW=cw/zoomScale, srcH=ch/zoomScale;
+  srcX=Math.max(0,srcX); srcY=Math.max(0,srcY);
+  srcW=Math.min(zoomImg.width-srcX,srcW); srcH=Math.min(zoomImg.height-srcY,srcH);
+  var outSize=1200, aspect=srcW/srcH;
+  var out=document.createElement('canvas');
+  out.width=aspect>1?outSize:Math.round(outSize*aspect);
+  out.height=aspect>1?Math.round(outSize/aspect):outSize;
+  out.getContext('2d').drawImage(zoomImg,srcX,srcY,srcW,srcH,0,0,out.width,out.height);
+  var url=out.toDataURL('image/jpeg',0.97);
+  var b64=url.split(',')[1];
   document.getElementById('zoomSection').style.display='none';
   document.getElementById('loadingBox').style.display='block';
-  document.getElementById('loadingImg').src=croppedUrl;
+  document.getElementById('loadingImg').src=url;
   document.getElementById('progressBar').style.width='0%';
-
-  prepareAndScan(b64, croppedUrl);
+  prepareAndScan(b64,url);
 }
 
-function prepareAndScan(b64orig, previewUrl){
+function prepareAndScan(b64orig,previewUrl){
   var img=new Image();
   img.onload=function(){
-    var w=img.width, h=img.height;
-
-    // Enhanced contrast version
-    var c2=document.createElement('canvas'); c2.width=w; c2.height=h;
-    var ctx2=c2.getContext('2d'); ctx2.drawImage(img,0,0,w,h);
-    var id2=ctx2.getImageData(0,0,w,h); var d2=id2.data;
-    for(var i=0;i<d2.length;i+=4){
-      var g=0.299*d2[i]+0.587*d2[i+1]+0.114*d2[i+2];
-      g=((g-128)*2.0)+128; g=Math.max(0,Math.min(255,g));
-      d2[i]=d2[i+1]=d2[i+2]=g;
-    }
-    ctx2.putImageData(id2,0,0);
-    var b64enh=c2.toDataURL('image/jpeg',0.97).split(',')[1];
-
-    // Inverted version (white text on dark)
-    var c3=document.createElement('canvas'); c3.width=w; c3.height=h;
-    var ctx3=c3.getContext('2d'); ctx3.drawImage(img,0,0,w,h);
-    var id3=ctx3.getImageData(0,0,w,h); var d3=id3.data;
-    for(var j=0;j<d3.length;j+=4){d3[j]=255-d3[j];d3[j+1]=255-d3[j+1];d3[j+2]=255-d3[j+2];}
-    ctx3.putImageData(id3,0,0);
-    var b64inv=c3.toDataURL('image/jpeg',0.97).split(',')[1];
-
-    callAPI(b64orig, b64enh, b64inv, previewUrl);
+    var w=img.width,h=img.height;
+    function process(fn){var c=document.createElement('canvas');c.width=w;c.height=h;var ctx=c.getContext('2d');ctx.drawImage(img,0,0,w,h);var d=ctx.getImageData(0,0,w,h);fn(d.data);ctx.putImageData(d,0,0);return c.toDataURL('image/jpeg',0.95).split(',')[1];}
+    var b64enh=process(function(d){for(var i=0;i<d.length;i+=4){var g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];g=((g-128)*1.8)+128;g=Math.max(0,Math.min(255,g));d[i]=d[i+1]=d[i+2]=g;}});
+    var b64inv=process(function(d){for(var i=0;i<d.length;i+=4){d[i]=255-d[i];d[i+1]=255-d[i+1];d[i+2]=255-d[i+2];}});
+    callAPI(b64orig,b64enh,b64inv,previewUrl);
   };
   img.src='data:image/jpeg;base64,'+b64orig;
 }
 
+// ---- SINGLE SCAN PROMPTS ----
 var PROMPTS=[
-  'You are an expert OCR system for ISO shipping containers. Find the container number: EXACTLY 11 chars = 4 uppercase letters + 7 digits. Example: TIIU6093197. May be horizontal or vertical. CRITICAL: I vs 1, I vs R, I vs L, O vs 0, O vs Q, G vs 6, B vs 8, S vs 5. The 2nd and 3rd letters are often I (capital i) not R or L. Reply ONLY 11 chars. If not found: NOTFOUND',
-  'Shipping container OCR. Format: [3 letters][U][6 digit serial][1 check digit] = 11 chars. Common: TCNU CSNU TIIU MSCU HLXU TGHU GESU TRHU CAIU. IMPORTANT: 2nd/3rd characters are often I not R or L. Reply ONLY 11 chars.',
-  'Find ISO 6346 container number. Exactly 4 letters then 7 digits. 4th letter is almost always U. Watch out: I looks like 1, l, r when small. Re-verify each letter twice. Reply ONLY the 11-character code.',
-  'Read container number character by character. Format: L-L-L-L-D-D-D-D-D-D-D. Distinguish carefully: I vs R, I vs L, I vs 1, 0 vs O, 6 vs G, 8 vs B. Re-examine each letter position. Reply ONLY 11 chars.',
-  'Container code = 4 letters + 7 digits. May be vertical or faded. Focus on getting each LETTER correct - I vs R vs L are the most common errors. Reply ONLY the 11-character code.'
+  'Expert container OCR. Find EXACTLY 11 chars: 4 uppercase letters + 7 digits. Example: TIIU6093197. Any angle. CRITICAL: I vs 1, I vs R, I vs L, O vs 0, G vs 6, B vs 8. 2nd/3rd letters often I not R/L. Reply ONLY 11 chars. If not found: NOTFOUND',
+  'Container number: [3 letters][U][6 digits][check digit]=11 chars. Codes: TCNU CSNU TIIU MSCU HLXU TGHU. Check vertical text too. I (capital i) often mistaken for R or L. Reply ONLY 11 chars.',
+  'ISO 6346 container code: 4 letters then 7 digits. 4th letter usually U. Verify each char twice especially I vs R vs L vs 1. Reply ONLY the 11-character code.',
+  'Read container number char by char: L-L-L-L-D-D-D-D-D-D-D. Re-examine: I vs R? I vs L? 0 vs O? 6 vs G? 8 vs B? Reply ONLY 11 chars.',
+  'Container code 4 letters+7 digits. Vertical/small text: focus on each letter carefully. I vs R vs L are most confused. Common: TCNU TIIU TGHU TRHU. Reply ONLY 11-char code.'
 ];
 
-function scanOnce(b64, prompt, n){
-  document.getElementById('scanMsg').textContent='Scanning '+n+' of 5...';
-  document.getElementById('progressBar').style.width=((n-1)*14)+'%';
-  return fetch(WORKER,{
-    method:'POST', headers:{'content-type':'application/json'},
-    body:JSON.stringify({model:'claude-opus-4-6', max_tokens:20,
-      messages:[{role:'user',content:[
-        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
-        {type:'text',text:prompt}
-      ]}]
+function scanOnce(b64,prompt,n,total,msgId,barId){
+  document.getElementById(msgId).textContent='Scanning '+n+' of '+total+'...';
+  document.getElementById(barId).style.width=((n-1)*(80/total))+'%';
+  return fetch(WORKER,{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({model:'claude-opus-4-6',max_tokens:20,
+      messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},{type:'text',text:prompt}]}]
     })
-  })
-  .then(function(r){return r.json();})
-  .then(function(j){
-    if(j.error) throw new Error(j.error.message);
+  }).then(function(r){return r.json();}).then(function(j){
+    if(j.error)throw new Error(j.error.message);
     return ((j.content&&j.content[0]&&j.content[0].text)||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
   });
 }
 
-function isValidFormat(r){return r&&r!=='NOTFOUND'&&r.length===11&&/^[A-Z]{4}[0-9]{7}$/.test(r);}
+function isValid(r){return r&&r!=='NOTFOUND'&&r.length===11&&/^[A-Z]{4}[0-9]{7}$/.test(r);}
 
-function callAPI(b64orig, b64enh, b64inv, imgUrl){
+function callAPI(b64orig,b64enh,b64inv,imgUrl){
   var results=[];
-  var plan=[
-    {b64:b64orig, p:PROMPTS[0]},
-    {b64:b64enh,  p:PROMPTS[1]},
-    {b64:b64orig, p:PROMPTS[2]},
-    {b64:b64enh,  p:PROMPTS[3]},
-    {b64:b64inv,  p:PROMPTS[4]}
-  ];
+  var plan=[{b:b64orig,p:PROMPTS[0]},{b:b64enh,p:PROMPTS[1]},{b:b64orig,p:PROMPTS[2]},{b:b64enh,p:PROMPTS[3]},{b:b64inv,p:PROMPTS[4]}];
   function run(i){
     if(i>=5){finalize(imgUrl,results,b64enh);return;}
-    scanOnce(plan[i].b64, plan[i].p, i+1)
-    .then(function(r){results.push(r);run(i+1);})
-    .catch(function(){results.push('ERR');run(i+1);});
+    scanOnce(plan[i].b,plan[i].p,i+1,5,'scanMsg','progressBar')
+    .then(function(r){results.push(r);run(i+1);}).catch(function(){results.push('ERR');run(i+1);});
   }
   run(0);
 }
 
-function finalize(imgUrl, results, b64enh){
+function finalize(imgUrl,results,b64enh){
   document.getElementById('scanMsg').textContent='Double-checking...';
-  document.getElementById('progressBar').style.width='80%';
-  var valid=results.filter(isValidFormat);
-  if(!valid.length){
-    showResult(imgUrl,'','Could not detect. Please type manually.',0,false,false);
-    return;
-  }
+  document.getElementById('progressBar').style.width='85%';
+  var valid=results.filter(isValid);
+  if(!valid.length){showResult(imgUrl,'','Could not detect. Please type manually.',0,false,false);return;}
   var counts={};
   valid.forEach(function(r){counts[r]=(counts[r]||0)+1;});
   var sorted=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a];});
-  var winner=sorted[0], votes=counts[winner];
-  if(sorted.length>1&&counts[sorted[0]]===counts[sorted[1]]){
-    if(validateContainer(sorted[1])&&!validateContainer(sorted[0])){winner=sorted[1];votes=counts[sorted[1]];}
-  }
-
-  // Final verification scan
-  var vp='I detected container number: '+winner+'. Check each character one by one in this image: '
-    +winner.split('').join(' - ')+'. Especially verify: is each I really I and not R or L? '
-    +'If correct reply: CONFIRMED '+winner+'. If wrong reply the correct 11-char code only. If unsure: UNCERTAIN';
-
+  var winner=sorted[0],votes=counts[winner];
+  if(sorted.length>1&&counts[sorted[0]]===counts[sorted[1]]&&validateContainer(sorted[1])&&!validateContainer(sorted[0])){winner=sorted[1];votes=counts[sorted[1]];}
+  var vp='Detected: '+winner+'. Verify each char: '+winner.split('').join(' ')+'. If correct: CONFIRMED '+winner+'. If wrong: reply correct 11-char code. If unsure: UNCERTAIN';
   fetch(WORKER,{method:'POST',headers:{'content-type':'application/json'},
-    body:JSON.stringify({model:'claude-opus-4-6',max_tokens:30,
-      messages:[{role:'user',content:[
-        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64enh}},
-        {type:'text',text:vp}
-      ]}]
-    })
-  })
-  .then(function(r){return r.json();})
-  .then(function(j){
+    body:JSON.stringify({model:'claude-opus-4-6',max_tokens:30,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64enh}},{type:'text',text:vp}]}]})
+  }).then(function(r){return r.json();}).then(function(j){
     var reply=((j.content&&j.content[0]&&j.content[0].text)||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
-    var confirmed=false, final=winner;
+    var confirmed=false,final=winner;
     if(reply.indexOf('CONFIRMED')===0){confirmed=true;}
-    else if(isValidFormat(reply)){
-      if(reply===winner){confirmed=true;}
-      else if(validateContainer(reply)&&!validateContainer(winner)){final=reply;}
-    }
+    else if(isValid(reply)){if(reply===winner){confirmed=true;}else if(validateContainer(reply)&&!validateContainer(winner)){final=reply;}}
     document.getElementById('progressBar').style.width='100%';
     showResult(imgUrl,final,'',votes,validateContainer(final),confirmed);
-  })
-  .catch(function(){
-    document.getElementById('progressBar').style.width='100%';
-    showResult(imgUrl,winner,'',votes,validateContainer(winner),false);
-  });
-}
-
-function validateContainer(num){
-  if(!num||num.length!==11)return false;
-  var map={},v=10;
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l){if(v%11===10)v++;map[l]=v++;});
-  var sum=0;
-  for(var i=0;i<10;i++){var c=num[i],val=isNaN(c)?map[c]:parseInt(c);if(val===undefined)return false;sum+=val*Math.pow(2,i);}
-  var chk=sum%11; if(chk===10)chk=0;
-  return chk===parseInt(num[10]);
+  }).catch(function(){document.getElementById('progressBar').style.width='100%';showResult(imgUrl,winner,'',votes,validateContainer(winner),false);});
 }
 
 function showResult(imgUrl,detected,err,votes,checkOk,confirmed){
@@ -461,31 +430,210 @@ function showResult(imgUrl,detected,err,votes,checkOk,confirmed){
   document.getElementById('numInput').value=detected;
   var b=document.getElementById('banner');
   if(detected){
-    var perfect=(confirmed&&votes>=3&&checkOk);
-    var good=(votes>=4&&checkOk)||(confirmed&&checkOk);
+    var perfect=(confirmed&&votes>=3&&checkOk),good=(votes>=4&&checkOk)||(confirmed&&checkOk);
     b.className=(perfect||good)?'banner ok':'banner warn';
     var stars=perfect?'&#9989;&#9989;&#9989;':good?'&#9989;&#9989;':votes>=3?'&#9989;':'&#9888;&#65039;';
     var label=perfect?'100% Confirmed':good?'High Confidence':votes>=3?'Likely Correct':'Please Verify';
     var detail=(confirmed?'Double-check confirmed + ':votes+'/5 scans + ')+(checkOk?'check digit valid':'verify manually');
-    b.innerHTML=stars+' '+label+': <span style="font-family:monospace;letter-spacing:3px;font-size:16px">'+detected+'</span>'
-      +'<br><small style="font-weight:400;font-size:12px">'+detail+'</small>';
+    b.innerHTML=stars+' '+label+': <span style="font-family:monospace;letter-spacing:3px;font-size:16px">'+detected+'</span><br><small style="font-weight:400;font-size:12px">'+detail+'</small>';
   }else{b.className='banner err';b.textContent=err;}
 }
 
+// ---- BOL SCANNER ----
+var bolNumbers=[];
+
+function handleBOL(input){
+  var file=input.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    document.getElementById('bolUploadZone').style.display='none';
+    document.getElementById('bolLoadingBox').style.display='block';
+    document.getElementById('bolLoadingImg').src=e.target.result;
+    document.getElementById('bolProgressBar').style.width='10%';
+    document.getElementById('bolScanMsg').textContent='Reading Bill of Lading...';
+    var b64=e.target.result.split(',')[1];
+    scanBOL(b64,e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+function scanBOL(b64,previewUrl){
+  document.getElementById('bolProgressBar').style.width='30%';
+  document.getElementById('bolScanMsg').textContent='Extracting container numbers...';
+
+  var prompt='You are an expert at reading Bill of Lading (BOL) documents. '
+    +'Extract ALL ISO shipping container numbers from this document image. '
+    +'Container numbers follow ISO 6346 format: exactly 4 capital letters followed by 7 digits (total 11 characters). '
+    +'Examples: TIIU6093197, TCNU1234567, MSCU9876543. '
+    +'Look everywhere in the document: tables, lists, header, body text, any field labeled "Container No", "CNTR", "Container Number" etc. '
+    +'IMPORTANT: Be careful with similar characters: I vs 1, I vs R, O vs 0, G vs 6, B vs 8. '
+    +'Return ONLY a JSON array of container numbers found. Example: ["TIIU6093197","TCNU1234567"]. '
+    +'If none found return: []';
+
+  fetch(WORKER,{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({model:'claude-opus-4-6',max_tokens:500,
+      messages:[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
+        {type:'text',text:prompt}
+      ]}]
+    })
+  }).then(function(r){return r.json();}).then(function(j){
+    document.getElementById('bolProgressBar').style.width='70%';
+    document.getElementById('bolScanMsg').textContent='Verifying numbers...';
+    var text=((j.content&&j.content[0]&&j.content[0].text)||'').trim();
+    var found=[];
+    try{
+      var match=text.match(/\[.*\]/s);
+      if(match){found=JSON.parse(match[0]);}
+    }catch(e){
+      // fallback: extract by regex
+      var re=/[A-Z]{4}[0-9]{7}/g, m;
+      while((m=re.exec(text))!==null){found.push(m[0]);}
+    }
+    // Deduplicate and validate format
+    var seen={};
+    found=found.filter(function(n){
+      n=n.toUpperCase().replace(/[^A-Z0-9]/g,'');
+      if(isValid(n)&&!seen[n]){seen[n]=true;return true;}
+      return false;
+    });
+    // Second pass scan to verify
+    verifyBOL(b64,previewUrl,found);
+  }).catch(function(e){
+    showBOLResult(previewUrl,[]);
+    showToast('BOL scan error: '+e.message);
+  });
+}
+
+function verifyBOL(b64,previewUrl,firstPass){
+  document.getElementById('bolProgressBar').style.width='85%';
+  document.getElementById('bolScanMsg').textContent='Double-checking results...';
+
+  var prompt='You are verifying container numbers from a Bill of Lading. '
+    +'First pass detected these numbers: '+JSON.stringify(firstPass)+'. '
+    +'Please look at this document image again carefully and: '
+    +'1. Confirm which of these are correct '
+    +'2. Fix any that are wrong '
+    +'3. Add any container numbers that were missed '
+    +'Return ONLY a JSON array of the final verified container numbers. '
+    +'Each must be exactly 11 chars: 4 letters + 7 digits. '
+    +'Example: ["TIIU6093197","TCNU1234567"]. If none found: []';
+
+  fetch(WORKER,{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({model:'claude-opus-4-6',max_tokens:500,
+      messages:[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
+        {type:'text',text:prompt}
+      ]}]
+    })
+  }).then(function(r){return r.json();}).then(function(j){
+    var text=((j.content&&j.content[0]&&j.content[0].text)||'').trim();
+    var verified=[];
+    try{
+      var match=text.match(/\[.*\]/s);
+      if(match){verified=JSON.parse(match[0]);}
+    }catch(e){
+      var re=/[A-Z]{4}[0-9]{7}/g, m;
+      while((m=re.exec(text))!==null){verified.push(m[0]);}
+    }
+    var seen={};
+    verified=verified.filter(function(n){
+      n=n.toUpperCase().replace(/[^A-Z0-9]/g,'');
+      if(isValid(n)&&!seen[n]){seen[n]=true;return true;}
+      return false;
+    });
+    document.getElementById('bolProgressBar').style.width='100%';
+    showBOLResult(previewUrl, verified.length>0?verified:firstPass);
+  }).catch(function(){
+    document.getElementById('bolProgressBar').style.width='100%';
+    showBOLResult(previewUrl,firstPass);
+  });
+}
+
+function showBOLResult(previewUrl,numbers){
+  bolNumbers=numbers;
+  document.getElementById('bolLoadingBox').style.display='none';
+  document.getElementById('bolResultBox').style.display='block';
+  document.getElementById('bolPrevImg').src=previewUrl;
+  document.getElementById('bolFoundLabel').textContent=numbers.length+' container'+(numbers.length!==1?'s':'')+' found';
+  var html='';
+  if(!numbers.length){
+    html='<div style="padding:20px;text-align:center;color:#475569;font-size:13px">No container numbers detected.<br>Try a clearer photo.</div>';
+  } else {
+    numbers.forEach(function(n,i){
+      var chkOk=validateContainer(n);
+      html+='<div class="bol-row">'
+        +'<span class="bol-chk">'+(chkOk?'&#9989;':'&#9888;&#65039;')+'</span>'
+        +'<input class="bol-edit" id="bolN'+i+'" value="'+n+'" maxlength="11" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,\'\')">'
+        +'</div>';
+    });
+  }
+  document.getElementById('bolList').innerHTML=html;
+}
+
+function logAllBOL(){
+  var now=new Date();
+  var count=0;
+  bolNumbers.forEach(function(_,i){
+    var el=document.getElementById('bolN'+i);
+    if(!el)return;
+    var n=el.value.trim().toUpperCase();
+    if(!n||n.length<7)return;
+    records.unshift({id:Date.now()+i,containerNumber:n,date:now.toLocaleDateString('en-GB'),time:now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),source:'BOL'});
+    count++;
+  });
+  if(count>0){saveRecords();renderRecords();showToast(count+' containers logged!');resetBOL();}
+  else{showToast('No valid numbers to log');}
+}
+
+function exportBOLCSV(){
+  if(!bolNumbers.length){showToast('No numbers found');return;}
+  var now=new Date();
+  var rows=[['No.','Container Number','Date','Time','Source']];
+  bolNumbers.forEach(function(_,i){
+    var el=document.getElementById('bolN'+i);
+    if(!el)return;
+    var n=el.value.trim().toUpperCase();
+    if(n) rows.push([i+1,n,now.toLocaleDateString('en-GB'),now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),'BOL']);
+  });
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([rows.map(function(r){return r.join(',');}).join('\n')],{type:'text/csv'}));
+  a.download='BOL-containers-'+now.toLocaleDateString('en-GB').replace(/\//g,'-')+'.csv';
+  a.click(); showToast('BOL CSV downloaded!');
+}
+
+function resetBOL(){
+  document.getElementById('bolUploadZone').style.display='block';
+  document.getElementById('bolLoadingBox').style.display='none';
+  document.getElementById('bolResultBox').style.display='none';
+  bolNumbers=[];
+}
+
+// ---- VALIDATE ----
+function validateContainer(num){
+  if(!num||num.length!==11)return false;
+  var map={},v=10;
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(l){if(v%11===10)v++;map[l]=v++;});
+  var sum=0;
+  for(var i=0;i<10;i++){var c=num[i],val=isNaN(c)?map[c]:parseInt(c);if(val===undefined)return false;sum+=val*Math.pow(2,i);}
+  var chk=sum%11;if(chk===10)chk=0;return chk===parseInt(num[10]);
+}
+
+// ---- RECORDS ----
 function resetAll(){
   document.getElementById('uploadZone').style.display='block';
   document.getElementById('zoomSection').style.display='none';
   document.getElementById('loadingBox').style.display='none';
   document.getElementById('resultBox').style.display='none';
   document.getElementById('numInput').value='';
-  origImg=null;
+  zoomImg=null;
 }
 
-function logRecord(){
+function logRecord(src){
   var n=document.getElementById('numInput').value.trim().toUpperCase();
   if(!n){showToast('Enter a container number');return;}
   var now=new Date();
-  records.unshift({id:Date.now(),containerNumber:n,date:now.toLocaleDateString('en-GB'),time:now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})});
+  records.unshift({id:Date.now(),containerNumber:n,date:now.toLocaleDateString('en-GB'),time:now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),source:src||'single'});
   saveRecords();showToast(n+' logged!');resetAll();renderRecords();
 }
 
@@ -494,7 +642,7 @@ function delRecord(id){records=records.filter(function(r){return r.id!==id;});sa
 function renderRecords(){
   document.getElementById('totalCount').textContent=records.length;
   var el=document.getElementById('recList');
-  if(!records.length){el.innerHTML='<div class="empty">No records yet.<br>Take a photo to get started.</div>';return;}
+  if(!records.length){el.innerHTML='<div class="empty">No records yet.<br>Use Single Scan or BOL Scanner.</div>';return;}
   var grouped={};
   records.forEach(function(r){if(!grouped[r.date])grouped[r.date]=[];grouped[r.date].push(r);});
   var html='';
@@ -502,7 +650,11 @@ function renderRecords(){
     var recs=grouped[date];
     html+='<div class="date-lbl"><span>'+date+'</span><span>'+recs.length+' record'+(recs.length>1?'s':'')+'</span></div>';
     recs.forEach(function(r,i){
-      html+='<div class="rec-row"><div class="rec-idx">#'+(i+1)+'</div><div class="rec-num">'+r.containerNumber+'</div><div class="rec-meta">'+r.date+'<br>'+r.time+'</div><button class="btn-del" onclick="delRecord('+r.id+')">&#10005;</button></div>';
+      html+='<div class="rec-row"><div class="rec-idx">#'+(i+1)+'</div>'
+        +'<div style="flex:1"><div class="rec-num">'+r.containerNumber+'</div>'
+        +'<span class="rec-src">'+(r.source==='BOL'?'&#128196; BOL':'&#128247; Scan')+'</span></div>'
+        +'<div class="rec-meta">'+r.date+'<br>'+r.time+'</div>'
+        +'<button class="btn-del" onclick="delRecord('+r.id+')">&#10005;</button></div>';
     });
   });
   el.innerHTML=html;
@@ -510,8 +662,8 @@ function renderRecords(){
 
 function exportCSV(){
   if(!records.length){showToast('No records yet');return;}
-  var rows=[['No.','Container Number','Date','Time']];
-  records.forEach(function(r,i){rows.push([i+1,r.containerNumber,r.date,r.time]);});
+  var rows=[['No.','Container Number','Date','Time','Source']];
+  records.forEach(function(r,i){rows.push([i+1,r.containerNumber,r.date,r.time,r.source||'scan']);});
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([rows.map(function(r){return r.join(',');}).join('\n')],{type:'text/csv'}));
   a.download='containers-'+new Date().toLocaleDateString('en-GB').replace(/\//g,'-')+'.csv';
@@ -519,10 +671,7 @@ function exportCSV(){
 }
 
 var tt;
-function showToast(msg){
-  var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},2500);
-}
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},2500);}
 </script>
 </body>
 </html>
