@@ -208,21 +208,24 @@ function validateContainer(num) {
   return check === parseInt(num[10]);
 }
 
-function showResult(imgUrl, detected, err, confirmed) {
+function showResult(imgUrl, detected, err, confidence, checkOk) {
   document.getElementById('loadingBox').style.display = 'none';
   document.getElementById('resultBox').style.display = 'block';
   document.getElementById('prevImg').src = imgUrl;
   document.getElementById('numInput').value = detected;
   var b = document.getElementById('banner');
   if (detected) {
-    var valid = validateContainer(detected);
-    var bothMatch = confirmed && valid;
-    b.className = bothMatch ? 'banner ok' : 'banner warn';
-    b.innerHTML = (bothMatch ? '&#9989;&#9989; 100% Confirmed: ' : '&#9888;&#65039; Please verify: ')
+    var perfect = confidence === 3 && checkOk;
+    var good = confidence >= 2 && checkOk;
+    b.className = (perfect || good) ? 'banner ok' : 'banner warn';
+    var icon = perfect ? '&#9989;&#9989;&#9989;' : good ? '&#9989;&#9989;' : '&#9888;&#65039;';
+    var label = perfect ? '100% Confirmed' : good ? 'High Confidence' : 'Please Verify';
+    var detail = perfect ? '3/3 reads match + check digit valid'
+               : good    ? confidence + '/3 reads match + check digit valid'
+               :            'Only ' + confidence + '/3 reads agree — edit if wrong';
+    b.innerHTML = icon + ' ' + label + ': '
       + '<span style="font-family:monospace;letter-spacing:3px;font-size:16px">' + detected + '</span>'
-      + '<br><small style="font-weight:400;font-size:12px">'
-      + (bothMatch ? 'Both AI reads match + check digit valid!' : (err || 'Verify manually before logging'))
-      + '</small>';
+      + '<br><small style="font-weight:400;font-size:12px">' + detail + '</small>';
   } else {
     b.className = 'banner err';
     b.textContent = 'Could not read: ' + err;
