@@ -59,10 +59,10 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 <body>
 <div class="wrap">
   <div class="hdr">
-    <div class="logo">🚢</div>
+    <div class="logo">&#128674;</div>
     <div>
       <div class="title">Container Tracker</div>
-      <div class="sub">Photo → AI reads → Log</div>
+      <div class="sub">Photo &rarr; AI reads &rarr; Log</div>
     </div>
     <div class="badge">
       <div class="badge-n" id="totalCount">0</div>
@@ -71,12 +71,12 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
   </div>
 
   <div class="zone" id="uploadZone">
-    <span class="zone-icon">📦</span>
+    <span class="zone-icon">&#128230;</span>
     <div class="zone-h">Take Container Photo</div>
     <p class="zone-p">Point camera at the container number.<br>AI will read it automatically.</p>
     <div class="btn-row">
-      <button class="btn-cam" onclick="document.getElementById('camInput').click()">📷 Camera</button>
-      <button class="btn-gal" onclick="document.getElementById('galInput').click()">🖼 Gallery</button>
+      <button class="btn-cam" onclick="document.getElementById('camInput').click()">&#128247; Camera</button>
+      <button class="btn-gal" onclick="document.getElementById('galInput').click()">&#128444; Gallery</button>
     </div>
     <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="handleFile(this)">
     <input type="file" id="galInput" accept="image/*" style="display:none" onchange="handleFile(this)">
@@ -84,28 +84,28 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 
   <div class="loading" id="loadingBox">
     <img id="loadingImg" src="" alt="">
-    <div class="spin-row"><div class="spinner"></div>AI reading container number…</div>
+    <div class="spin-row"><div class="spinner"></div>AI reading container number&hellip;</div>
   </div>
 
   <div class="result" id="resultBox">
     <img class="prev-img" id="prevImg" src="" alt="">
-    <div class="prev-bar"><button class="btn-clr" onclick="resetAll()">✕ Clear</button></div>
+    <div class="prev-bar"><button class="btn-clr" onclick="resetAll()">&#10005; Clear</button></div>
     <div class="banner" id="banner"></div>
     <div class="num-box">
-      <div class="num-lbl">Container Number — edit if needed</div>
+      <div class="num-lbl">Container Number &mdash; edit if needed</div>
       <input type="text" id="numInput" placeholder="CSNU2163239" maxlength="15"
              oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
     </div>
     <div class="act-row">
-      <button class="btn-retake" onclick="resetAll()">↩ Retake</button>
-      <button class="btn-log" onclick="logRecord()">✅ Log Record</button>
+      <button class="btn-retake" onclick="resetAll()">&#8617; Retake</button>
+      <button class="btn-log" onclick="logRecord()">&#9989; Log Record</button>
     </div>
   </div>
 
   <div class="rec-sec">
     <div class="rec-hdr">
-      <div class="rec-title">📋 Records</div>
-      <button class="btn-exp" onclick="exportCSV()">⬇ Export CSV</button>
+      <div class="rec-title">&#128203; Records</div>
+      <button class="btn-exp" onclick="exportCSV()">&#8681; Export CSV</button>
     </div>
     <div id="recList"></div>
   </div>
@@ -113,33 +113,39 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 <div class="toast" id="toast"></div>
 
 <script>
-// ⚠️ IMPORTANT: Replace the API key below with your own Anthropic API key
-// Get your key at: https://console.anthropic.com/
-const API_KEY = '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';
-
-const STORE = 'ct_pro';
-let records = [];
-try { records = JSON.parse(localStorage.getItem(STORE) || '[]'); } catch {}
+var API_KEY = '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';
+var STORE = 'ct_pro';
+var records = [];
+try { records = JSON.parse(localStorage.getItem(STORE) || '[]'); } catch(e) {}
 function saveRecords() { localStorage.setItem(STORE, JSON.stringify(records)); }
-window.onload = () => renderRecords();
+window.onload = function() { renderRecords(); };
 
 function resizeImage(file, cb) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = new Image();
-    img.onload = () => {
-      const MAX = 1024; let w = img.width, h = img.height;
-      if (w > MAX || h > MAX) { if (w > h) { h = Math.round(h * MAX / w); w = MAX; } else { w = Math.round(w * MAX / h); h = MAX; } }
-      const c = document.createElement('canvas'); c.width = w; c.height = h;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var MAX = 1024, w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      var c = document.createElement('canvas');
+      c.width = w; c.height = h;
       c.getContext('2d').drawImage(img, 0, 0, w, h);
-      const url = c.toDataURL('image/jpeg', 0.88); cb(url, url.split(',')[1]);
-    }; img.src = e.target.result;
-  }; reader.readAsDataURL(file);
+      var url = c.toDataURL('image/jpeg', 0.88);
+      cb(url, url.split(',')[1]);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 function handleFile(input) {
-  const file = input.files[0]; if (!file) return; input.value = '';
-  resizeImage(file, (url, b64) => {
+  var file = input.files[0];
+  if (!file) return;
+  input.value = '';
+  resizeImage(file, function(url, b64) {
     document.getElementById('uploadZone').style.display = 'none';
     document.getElementById('resultBox').style.display = 'none';
     document.getElementById('loadingBox').style.display = 'block';
@@ -148,34 +154,39 @@ function handleFile(input) {
   });
 }
 
-async function callAPI(b64, imgUrl) {
-  try {
-    const PROXY = 'https://corsproxy.io/?url=https://api.anthropic.com/v1/messages';
-    const res = await fetch(PROXY, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-haiku-20241022',
-        max_tokens: 64,
-        messages: [{
-          role: 'user', content: [
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
-            { type: 'text', text: 'Find the ISO shipping container number in this image. It is painted in large characters on the container. Format: 4 capital letters then 7 digits e.g. CSNU2163239. Reply ONLY the number no spaces. If not found reply: NOTFOUND' }
-          ]
-        }]
-      })
-    });
-    const json = await res.json();
-    if (!res.ok) { showResult(imgUrl, '', json?.error?.message || 'API error ' + res.status); return; }
-    const raw = (json?.content?.[0]?.text || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (!raw || raw === 'NOTFOUND' || raw.length < 7) { showResult(imgUrl, '', 'Could not read clearly. Please type below.'); }
-    else { showResult(imgUrl, raw, ''); }
-  } catch (e) { showResult(imgUrl, '', 'Network error: ' + e.message); }
+function callAPI(b64, imgUrl) {
+  var url = 'https://api.anthropic.com/v1/messages';
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': API_KEY,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-3-5-haiku-20241022',
+      max_tokens: 64,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
+          { type: 'text', text: 'Find the ISO shipping container number in this image. It is painted in large characters on the container. Format: 4 capital letters then 7 digits e.g. CSNU2163239. Reply ONLY the number, no spaces. If not found reply: NOTFOUND' }
+        ]
+      }]
+    })
+  })
+  .then(function(res) { return res.json().then(function(json) { return { ok: res.ok, status: res.status, json: json }; }); })
+  .then(function(r) {
+    if (!r.ok) { showResult(imgUrl, '', (r.json && r.json.error && r.json.error.message) || ('API error ' + r.status)); return; }
+    var raw = ((r.json.content && r.json.content[0] && r.json.content[0].text) || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (!raw || raw === 'NOTFOUND' || raw.length < 7) {
+      showResult(imgUrl, '', 'Could not read clearly. Please type below.');
+    } else {
+      showResult(imgUrl, raw, '');
+    }
+  })
+  .catch(function(e) { showResult(imgUrl, '', 'Network error: ' + e.message); });
 }
 
 function showResult(imgUrl, detected, err) {
@@ -183,11 +194,14 @@ function showResult(imgUrl, detected, err) {
   document.getElementById('resultBox').style.display = 'block';
   document.getElementById('prevImg').src = imgUrl;
   document.getElementById('numInput').value = detected;
-  const b = document.getElementById('banner');
+  var b = document.getElementById('banner');
   if (detected) {
     b.className = 'banner ok';
-    b.innerHTML = '✅ Detected: <span style="font-family:monospace;letter-spacing:3px;font-size:16px">' + detected + '</span><br><small style="font-weight:400;font-size:12px">Verify and tap Log Record</small>';
-  } else { b.className = 'banner err'; b.textContent = '⚠️ ' + err; }
+    b.innerHTML = '&#9989; Detected: <span style="font-family:monospace;letter-spacing:3px;font-size:16px">' + detected + '</span><br><small style="font-weight:400;font-size:12px">Verify and tap Log Record</small>';
+  } else {
+    b.className = 'banner err';
+    b.textContent = 'Could not read: ' + err;
+  }
 }
 
 function resetAll() {
@@ -198,28 +212,51 @@ function resetAll() {
 }
 
 function logRecord() {
-  const n = document.getElementById('numInput').value.trim().toUpperCase();
-  if (!n) { showToast('⚠️ Enter a container number'); return; }
-  const now = new Date();
-  records.unshift({ id: Date.now(), containerNumber: n, date: now.toLocaleDateString('en-GB'), time: now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) });
-  saveRecords(); showToast('✅ ' + n + ' logged!'); resetAll(); renderRecords();
+  var n = document.getElementById('numInput').value.trim().toUpperCase();
+  if (!n) { showToast('Enter a container number'); return; }
+  var now = new Date();
+  records.unshift({
+    id: Date.now(),
+    containerNumber: n,
+    date: now.toLocaleDateString('en-GB'),
+    time: now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+  });
+  saveRecords();
+  showToast(n + ' logged!');
+  resetAll();
+  renderRecords();
 }
 
 function delRecord(id) {
-  records = records.filter(r => r.id !== id); saveRecords(); renderRecords(); showToast('Deleted');
+  records = records.filter(function(r) { return r.id !== id; });
+  saveRecords();
+  renderRecords();
+  showToast('Deleted');
 }
 
 function renderRecords() {
   document.getElementById('totalCount').textContent = records.length;
-  const el = document.getElementById('recList');
-  if (!records.length) { el.innerHTML = '<div class="empty">📋<br><br>No records yet.<br>Take a photo to get started.</div>'; return; }
-  const grouped = {};
-  records.forEach(r => { (grouped[r.date] = grouped[r.date] || []).push(r); });
-  let html = '';
-  Object.entries(grouped).forEach(([date, recs]) => {
-    html += `<div class="date-lbl"><span>${date}</span><span>${recs.length} record${recs.length > 1 ? 's' : ''}</span></div>`;
-    recs.forEach((r, i) => {
-      html += `<div class="rec-row"><div class="rec-idx">#${i + 1}</div><div class="rec-num">${r.containerNumber}</div><div class="rec-meta">${r.date}<br>${r.time}</div><button class="btn-del" onclick="delRecord(${r.id})">✕</button></div>`;
+  var el = document.getElementById('recList');
+  if (!records.length) {
+    el.innerHTML = '<div class="empty">No records yet.<br>Take a photo to get started.</div>';
+    return;
+  }
+  var grouped = {};
+  records.forEach(function(r) {
+    if (!grouped[r.date]) grouped[r.date] = [];
+    grouped[r.date].push(r);
+  });
+  var html = '';
+  Object.keys(grouped).forEach(function(date) {
+    var recs = grouped[date];
+    html += '<div class="date-lbl"><span>' + date + '</span><span>' + recs.length + ' record' + (recs.length > 1 ? 's' : '') + '</span></div>';
+    recs.forEach(function(r, i) {
+      html += '<div class="rec-row">'
+        + '<div class="rec-idx">#' + (i + 1) + '</div>'
+        + '<div class="rec-num">' + r.containerNumber + '</div>'
+        + '<div class="rec-meta">' + r.date + '<br>' + r.time + '</div>'
+        + '<button class="btn-del" onclick="delRecord(' + r.id + ')">&#10005;</button>'
+        + '</div>';
     });
   });
   el.innerHTML = html;
@@ -227,15 +264,24 @@ function renderRecords() {
 
 function exportCSV() {
   if (!records.length) { showToast('No records yet'); return; }
-  const rows = [['No.', 'Container Number', 'Date', 'Time'], ...records.map((r, i) => [i + 1, r.containerNumber, r.date, r.time])];
-  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([rows.map(r => r.join(',')).join('\n')], { type: 'text/csv' })), download: 'containers-' + new Date().toLocaleDateString('en-GB').replace(/\//g, '-') + '.csv' });
-  a.click(); showToast('📥 CSV downloaded!');
+  var rows = [['No.', 'Container Number', 'Date', 'Time']];
+  records.forEach(function(r, i) { rows.push([i + 1, r.containerNumber, r.date, r.time]); });
+  var csv = rows.map(function(r) { return r.join(','); }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'containers-' + new Date().toLocaleDateString('en-GB').replace(/\//g, '-') + '.csv';
+  a.click();
+  showToast('CSV downloaded!');
 }
 
-let tt;
+var tt;
 function showToast(msg) {
-  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2500);
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(tt);
+  tt = setTimeout(function() { t.classList.remove('show'); }, 2500);
 }
 </script>
 </body>
