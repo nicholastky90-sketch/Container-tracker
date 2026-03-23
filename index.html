@@ -33,6 +33,7 @@ body{background:#0b1120;color:#e2e8f0;font-family:system-ui,sans-serif;min-heigh
 .btn-clr{background:none;border:1px solid rgba(255,255,255,.1);color:#475569;border-radius:6px;padding:4px 14px;font-size:12px;cursor:pointer}
 .banner{padding:12px 14px;border-radius:10px;font-size:14px;margin-bottom:12px;font-weight:600;line-height:1.6}
 .banner.ok{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);color:#4ade80}
+.banner.warn{background:rgba(250,204,21,.08);border:1px solid rgba(250,204,21,.3);color:#facc15}
 .banner.err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);color:#f87171;font-weight:400;font-size:13px}
 .num-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;margin-bottom:12px}
 .num-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#475569;margin-bottom:8px}
@@ -183,6 +184,30 @@ function callAPI(b64, imgUrl) {
   .catch(function(e) { showResult(imgUrl, '', 'Network error: ' + e.message); });
 }
 
+// ISO 6346 check digit validation
+function validateContainer(num) {
+  if (!num || num.length !== 11) return false;
+  var letters = 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z';
+  var vals = letters.split(' ');
+  var letterMap = {};
+  var v = 10;
+  vals.forEach(function(l) {
+    if (v % 11 === 10) v++;
+    letterMap[l] = v;
+    v++;
+  });
+  var sum = 0;
+  for (var i = 0; i < 10; i++) {
+    var c = num[i];
+    var val = isNaN(c) ? letterMap[c] : parseInt(c);
+    if (val === undefined) return false;
+    sum += val * Math.pow(2, i);
+  }
+  var check = sum % 11;
+  if (check === 10) check = 0;
+  return check === parseInt(num[10]);
+}
+
 function showResult(imgUrl, detected, err) {
   document.getElementById('loadingBox').style.display = 'none';
   document.getElementById('resultBox').style.display = 'block';
@@ -190,8 +215,13 @@ function showResult(imgUrl, detected, err) {
   document.getElementById('numInput').value = detected;
   var b = document.getElementById('banner');
   if (detected) {
-    b.className = 'banner ok';
-    b.innerHTML = '&#9989; Detected: <span style="font-family:monospace;letter-spacing:3px;font-size:16px">' + detected + '</span><br><small style="font-weight:400;font-size:12px">Verify and tap Log Record</small>';
+    var valid = validateContainer(detected);
+    b.className = valid ? 'banner ok' : 'banner warn';
+    b.innerHTML = (valid ? '&#9989; Verified: ' : '&#9888;&#65039; Unverified: ')
+      + '<span style="font-family:monospace;letter-spacing:3px;font-size:16px">' + detected + '</span>'
+      + '<br><small style="font-weight:400;font-size:12px">'
+      + (valid ? 'Check digit valid — tap Log Record' : 'Check digit FAILED — please verify manually before logging')
+      + '</small>';
   } else {
     b.className = 'banner err';
     b.textContent = 'Could not read: ' + err;
