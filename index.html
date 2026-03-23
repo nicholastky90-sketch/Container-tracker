@@ -165,7 +165,7 @@ function callAPI(b64, imgUrl) {
         role: 'user',
         content: [
           { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
-          { type: 'text', text: 'Look carefully at this image for an ISO shipping container number. It may be printed horizontally or vertically, on the outside or inside wall. The format is exactly 4 capital letters followed by 7 digits (example: TCNU6063917, CSNU2163239). Look at every angle and wall in the image. Reply ONLY with the container number, no spaces, no extra text. If you cannot find it clearly, reply: NOTFOUND' }
+          { type: 'text', text: 'You are an expert at reading ISO shipping container numbers. Examine every part of this image very carefully including vertical text on walls. The container number is exactly 4 capital letters followed by 7 digits (e.g. TIIU6093197, TCNU6063917). Common owner codes are: TCNU, CSNU, TIIU, MSCU, HLXU, TGHU, GESU, TRHU. Read each character very carefully - do not confuse 0 with Q, 1 with I, 6 with G, 8 with B. Reply ONLY with the container number, no spaces. If unclear reply: NOTFOUND' }
         ]
       }]
     })
