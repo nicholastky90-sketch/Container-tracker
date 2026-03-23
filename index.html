@@ -440,6 +440,79 @@ function showSingleResult(imgUrl,detected,err,votes,checkOk,confirmed){
 var multiQueue=[];
 var multiResults=[];
 
+// Scan ONE photo for MULTIPLE container numbers
+function scanPhotoForMultiple(b64, previewUrl, cb){
+  var img=new Image();
+  img.onload=function(){
+    var w=img.width,h=img.height;
+    function proc(fn){var c=document.createElement('canvas');c.width=w;c.height=h;var ctx=c.getContext('2d');ctx.drawImage(img,0,0);var d=ctx.getImageData(0,0,w,h);fn(d.data);ctx.putImageData(d,0,0);return c.toDataURL('image/jpeg',0.95).split(',')[1];}
+    var enh=proc(function(d){for(var i=0;i<d.length;i+=4){var g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];g=((g-128)*1.8)+128;g=Math.max(0,Math.min(255,g));d[i]=d[i+1]=d[i+2]=g;}});
+    var inv=proc(function(d){for(var i=0;i<d.length;i+=4){d[i]=255-d[i];d[i+1]=255-d[i+1];d[i+2]=255-d[i+2];}});
+
+    document.getElementById('multiScanMsg').textContent='Finding all containers in photo...';
+    document.getElementById('multiProgressBar').style.width='10%';
+
+    // Pass 1: find ALL container numbers in the image
+    var p1='This image may contain MULTIPLE shipping containers. Find ALL ISO container numbers visible. '
+      +'Each number is EXACTLY 11 chars: 4 capital letters + 7 digits (e.g. TIIU6093197, TCNU1234567). '
+      +'Look at every container in the image - doors, sides, top panels. '
+      +'Careful: I vs R vs L vs 1, O vs 0, G vs 6, B vs 8. '
+      +'Return ONLY a JSON array of all found numbers: ["TIIU6093197","TCNU1234567"]. If none: []';
+
+    // Pass 2: verify with enhanced image
+    var p2='Look carefully at this container image. There may be multiple containers visible. '
+      +'List ALL container registration numbers you can see. '
+      +'Format: 4 letters + 7 digits = 11 chars each. Common codes: TCNU CSNU TIIU MSCU HLXU TGHU. '
+      +'Do NOT miss any - check every container surface. '
+      +'Return ONLY JSON array: ["XXXX1234567"]. If none: []';
+
+    // Pass 3: inverted image catch white numbers
+    var p3='Scan this image for ALL visible container numbers. Each is 4 letters + 7 digits. '
+      +'Numbers may be white, black, painted, stenciled. Check all surfaces. '
+      +'Be especially careful: I vs R, I vs 1, O vs 0. '
+      +'Return ONLY JSON array of all found numbers. If none: []';
+
+    Promise.all([
+      apiCall(b64,   p1, 300),
+      apiCall(enh,   p2, 300),
+      apiCall(inv,   p3, 300)
+    ]).then(function(results){
+      document.getElementById('multiProgressBar').style.width='70%';
+      document.getElementById('multiScanMsg').textContent='Cross-checking results...';
+
+      // Merge all results
+      var allFound={};
+      results.forEach(function(text){
+        parseBOLNumbers(text).forEach(function(n){
+          allFound[n]=(allFound[n]||0)+1;
+        });
+      });
+
+      var candidates=Object.keys(allFound);
+
+      // Pass 4: final verification - confirm each candidate
+      if(!candidates.length){cb([]);return;}
+
+      var vp='I found these possible container numbers in the image: '+JSON.stringify(candidates)+'. '
+        +'Please look at the image again very carefully and: '
+        +'1. Confirm which are correct '
+        +'2. Fix any character errors (watch I vs R vs L vs 1, O vs 0, G vs 6) '
+        +'3. Add any containers you can see that were missed '
+        +'Return ONLY a JSON array of verified numbers. Each must be 4 letters+7 digits.';
+
+      apiCall(enh, vp, 400).then(function(verified){
+        document.getElementById('multiProgressBar').style.width='100%';
+        var final=parseBOLNumbers(verified);
+        // Fall back to candidates if verification fails
+        if(!final.length) final=candidates.filter(isValid);
+        cb(final);
+      }).catch(function(){cb(candidates.filter(isValid));});
+
+    }).catch(function(e){cb([]);showToast('Scan error: '+e.message);});
+  };
+  img.src='data:image/jpeg;base64,'+b64;
+}
+
 function handleMultiAdd(input){
   var file=input.files[0];if(!file)return;
   var r=new FileReader();
@@ -504,18 +577,21 @@ function showMultiResults(){
   document.getElementById('multiLoadingBox').style.display='none';
   document.getElementById('multiResultBox').style.display='block';
   var found=multiResults.filter(function(r){return r.number;}).length;
-  document.getElementById('multiFoundLabel').textContent=found+'/'+multiResults.length+' detected';
+  document.getElementById('multiFoundLabel').textContent=found+' containers found';
   var html='';
-  multiResults.forEach(function(r,i){
-    var perfect=(r.confirmed&&r.votes>=3&&r.checkOk),good=(r.votes>=4&&r.checkOk)||(r.confirmed&&r.checkOk);
-    var icon=perfect?'&#9989;&#9989;&#9989;':good?'&#9989;&#9989;':r.votes>=3?'&#9989;':'&#9888;&#65039;';
-    html+='<div class="multi-row">'
-      +'<img class="multi-thumb" src="'+r.url+'">'
-      +'<div class="multi-info">'
-      +'<input class="multi-edit" id="mN'+i+'" value="'+(r.number||'')+'" maxlength="11" placeholder="Not detected" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,\'\')">'
-      +'<div class="multi-badge">'+icon+' '+(r.number?((r.confirmed?'Confirmed':r.votes+'/5')+' '+(r.checkOk?'&#10003;':'&#9888;')):'Failed - type manually')+'</div>'
-      +'</div></div>';
-  });
+  if(!multiResults.length){
+    html='<div style="padding:20px;text-align:center;color:#475569;font-size:13px">No containers detected.<br>Try clearer photos.</div>';
+  } else {
+    multiResults.forEach(function(r,i){
+      var chkOk=validateContainer(r.number);
+      html+='<div class="multi-row">'
+        +'<img class="multi-thumb" src="'+r.url+'">'
+        +'<div class="multi-info">'
+        +'<input class="multi-edit" id="mN'+i+'" value="'+(r.number||'')+'" maxlength="11" placeholder="Not detected" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,\'\')">'
+        +'<div class="multi-badge">'+(chkOk?'&#9989; Check digit valid':'&#9888;&#65039; Verify manually')+' &bull; Photo '+r.photoIdx+'</div>'
+        +'</div></div>';
+    });
+  }
   document.getElementById('multiResults').innerHTML=html;
 }
 
